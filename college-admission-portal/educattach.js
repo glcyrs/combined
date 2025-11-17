@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Navigate pages based on step
       switch (index) {
-      case 0: window.location.href = "welcome.html"; break;
+      case 0: window.location.href = "index.html"; break;
       case 1: window.location.href = "readfirst.html"; break;
       case 2: window.location.href = "confirmation.html"; break;
       case 3: window.location.href = "aap.html"; break;
@@ -242,6 +242,9 @@ function showNotification(message) {
 
   // Show it
   noti.style.display = "flex";
+
+  //SCROLL TO TOP
+  window.scrollTo({ top: 0, behavior: "smooth" });
 
   // Auto-hide after 4 seconds
   if (noti._hideTimeout) clearTimeout(noti._hideTimeout);
@@ -421,6 +424,356 @@ window.removeFile = function (fileNumber) {
     window.location.href = "programs.html";
   });
 })();
+
+// =====================================================
+// RESTORE & SAVE ALL PROGRESS (JHS, SHS, Uploaded Files)
+// =====================================================
+document.addEventListener("DOMContentLoaded", () => {
+
+  // ---------- Helper to remove highlights if all filled ----------
+  function checkContainerHighlight(container, inputs) {
+    const empty = Array.from(inputs).some(input => !input.value || input.value.trim() === "" || input.value === "0");
+    if (!empty && container) container.classList.remove("input-error");
+  }
+
+  // ------------------- JHS GRADES -------------------
+  const jhsInputs = document.querySelectorAll('.grades-table input[type="number"]');
+  const content1Box = document.querySelector('.content1');
+
+  jhsInputs.forEach(input => {
+    const saved = localStorage.getItem(`jhs-${input.name}`);
+    if (saved) input.value = saved;
+
+    // Remove highlight if filled
+    if (input.value && input.value.trim() !== "" && input.value !== "0") {
+      input.classList.remove("input-error");
+    }
+
+    // Save & remove highlights on input
+    input.addEventListener("input", () => {
+      localStorage.setItem(`jhs-${input.name}`, input.value);
+      input.classList.remove("input-error");
+      checkContainerHighlight(content1Box, jhsInputs);
+    });
+  });
+
+  // ------------------- SHS GRADES -------------------
+  const shsInputs = document.querySelectorAll('.grades-table2 input[type="number"]');
+  const shsSelects = document.querySelectorAll('.grades-table2 select');
+
+  shsInputs.forEach(input => {
+    const saved = localStorage.getItem(`shs-${input.name}`);
+    if (saved) input.value = saved;
+
+    input.addEventListener("input", () => {
+      localStorage.setItem(`shs-${input.name}`, input.value);
+      input.classList.remove("input-error");
+
+      // Remove content2 highlight if all filled/N/A checked
+      const content2Box = input.closest('.content2');
+      const rows = content2Box.querySelectorAll('tr');
+      let empty = false;
+      rows.forEach(row => {
+        const na = row.querySelector('input[type="checkbox"]');
+        const val = row.querySelector('input[type="number"]');
+        if (val && (!val.value || val.value.trim() === "" || val.value === "0") && !(na && na.checked)) {
+          empty = true;
+        }
+      });
+      if (!empty) content2Box.classList.remove("input-error");
+    });
+  });
+
+  shsSelects.forEach(select => {
+    const saved = localStorage.getItem(`shs-${select.name}`);
+    if (saved) select.value = saved;
+
+    select.addEventListener("change", () => {
+      localStorage.setItem(`shs-${select.name}`, select.value);
+    });
+  });
+
+  // ------------------- UPLOADED FILES -------------------
+  Object.keys(uploadedFiles).forEach(key => {
+    const saved = localStorage.getItem(`file-${key}`);
+    if (saved) {
+      const fileInput = document.getElementById(`file${key}`);
+      if (fileInput) {
+        // Cannot restore actual File object, but we can restore status text
+        const status = document.getElementById(`status${key}`);
+        if (status) status.innerHTML = `
+          <i class="fa-solid fa-circle-check" style="color:#28a745;"></i>
+          ${saved}
+        `;
+        // Mark uploadedFiles for reference
+        uploadedFiles[key] = { file: { name: saved }, type: fileInput.dataset.type || "Required" };
+        const uploadBox = fileInput.closest(".upload-controls");
+        if (uploadBox) uploadBox.classList.remove("input-error");
+      }
+    }
+  });
+
+});
+
+// =====================================================
+// SAVE FILE UPLOADS TO LOCALSTORAGE
+// =====================================================
+function handleFileUpload(num, label) {
+  const input = document.getElementById(`file${num}`);
+  const status = document.getElementById(`status${num}`);
+  const file = input && input.files ? input.files[0] : null;
+
+  if (file) {
+    const type = label || (input && input.dataset && input.dataset.type) || "Required";
+    uploadedFiles[num] = { file, type };
+
+    if (status) {
+      status.innerHTML = `
+        <i class="fa-solid fa-circle-check" style="color:#28a745;"></i>
+        ${escapeHtml(file.name)}
+      `;
+    }
+
+    const uploadBox = input ? input.closest(".upload-controls") : null;
+    if (uploadBox) uploadBox.classList.remove("input-error");
+
+    // Save file name to localStorage for persistence
+    localStorage.setItem(`file-${num}`, file.name);
+
+    updateFileList();
+  }
+}
+
+// =====================================================
+// REMOVE FILE & LOCALSTORAGE ENTRY
+// =====================================================
+window.removeFile = function (fileNumber) {
+  uploadedFiles[fileNumber] = null;
+  const input = document.getElementById(`file${fileNumber}`);
+  if (input) input.value = "";
+  const status = document.getElementById(`status${fileNumber}`);
+  if (status) status.textContent = "No file chosen";
+
+  const uploadBox = input.closest(".upload-controls");
+  if (uploadBox) uploadBox.classList.add("input-error");
+
+  // Remove from localStorage
+  localStorage.removeItem(`file-${fileNumber}`);
+
+  updateFileList();
+  showNotification("File removed. Please upload a file for this slot.", "error");
+};
+
+// =====================================================
+// SAVE & RESTORE FORM PROGRESS (Education Fields + Uploaded Files)
+// =====================================================
+document.addEventListener("DOMContentLoaded", () => {
+  // ---------- EDUCATIONAL INFORMATION ----------
+  const eduFields = document.querySelectorAll('.container2 input, .container2 select, .container2 textarea');
+  eduFields.forEach(field => {
+    const saved = localStorage.getItem(`edu-${field.name}`);
+    if (saved !== null) {
+      if (field.type === "checkbox" || field.type === "radio") {
+        field.checked = saved === "true";
+      } else {
+        field.value = saved;
+      }
+      field.classList.remove("input-error");
+    }
+
+   // SAVE
+document.querySelectorAll('.container2 input, .container2 select, .container2 textarea').forEach(field => {
+    field.addEventListener('change', () => {
+        localStorage.setItem(`edu-${field.name}`, field.type === "checkbox" ? field.checked : field.value);
+    });
+});
+
+// RESTORE
+document.querySelectorAll('.container2 input, .container2 select, .container2 textarea').forEach(field => {
+    const saved = localStorage.getItem(`edu-${field.name}`);
+    if (saved !== null) {
+        if (field.type === "radio") field.checked = (field.value === saved);
+        else if (field.type === "checkbox") field.checked = (saved === "true");
+        else field.value = saved;
+    }
+});
+
+    // Also listen to change events for selects/radio
+    field.addEventListener("change", () => {
+      if (field.type === "checkbox" || field.type === "radio") {
+        localStorage.setItem(`edu-${field.name}`, field.checked);
+      } else {
+        localStorage.setItem(`edu-${field.name}`, field.value);
+      }
+      field.classList.remove("input-error");
+    });
+  });
+
+  // ---------- JHS GRADES ----------
+  const jhsInputs = document.querySelectorAll('.grades-table input[type="number"]');
+  const content1Box = document.querySelector('.content1');
+  jhsInputs.forEach(input => {
+    const saved = localStorage.getItem(`jhs-${input.name}`);
+    if (saved) input.value = saved;
+    if (input.value) input.classList.remove("input-error");
+
+    input.addEventListener("input", () => {
+      localStorage.setItem(`jhs-${input.name}`, input.value);
+      input.classList.remove("input-error");
+
+      const empty = Array.from(jhsInputs).some(i => !i.value || i.value.trim() === "" || i.value === "0");
+      if (!empty && content1Box) content1Box.classList.remove("input-error");
+    });
+  });
+
+  // ---------- SHS GRADES ----------
+  const shsInputs = document.querySelectorAll('.grades-table2 input[type="number"]');
+  const shsSelects = document.querySelectorAll('.grades-table2 select');
+
+  shsInputs.forEach(input => {
+    const saved = localStorage.getItem(`shs-${input.name}`);
+    if (saved) input.value = saved;
+    input.addEventListener("input", () => {
+      localStorage.setItem(`shs-${input.name}`, input.value);
+      input.classList.remove("input-error");
+    });
+  });
+
+  shsSelects.forEach(select => {
+    const saved = localStorage.getItem(`shs-${select.name}`);
+    if (saved) select.value = saved;
+
+    select.addEventListener("change", () => {
+      localStorage.setItem(`shs-${select.name}`, select.value);
+    });
+  });
+
+  // ---------- UPLOADED FILES ----------
+  Object.keys(uploadedFiles).forEach(key => {
+    const saved = localStorage.getItem(`file-${key}-data`);
+    if (saved) {
+      const data = JSON.parse(saved);
+      uploadedFiles[key] = data;
+
+      const status = document.getElementById(`status${key}`);
+      if (status) {
+        status.innerHTML = `
+          <i class="fa-solid fa-circle-check" style="color:#28a745;"></i>
+          ${data.file.name}
+        `;
+      }
+
+      const input = document.getElementById(`file${key}`);
+      if (input) {
+        const uploadBox = input.closest(".upload-controls");
+        if (uploadBox) uploadBox.classList.remove("input-error");
+      }
+    }
+  });
+
+  updateFileList();
+});
+
+// ---------- HANDLE FILE UPLOAD ----------
+function handleFileUpload(num, label) {
+  const input = document.getElementById(`file${num}`);
+  const status = document.getElementById(`status${num}`);
+  const file = input && input.files ? input.files[0] : null;
+
+  if (file) {
+    const type = label || (input.dataset && input.dataset.type) || "Required";
+    uploadedFiles[num] = { file, type };
+
+    if (status) {
+      status.innerHTML = `
+        <i class="fa-solid fa-circle-check" style="color:#28a745;"></i>
+        ${escapeHtml(file.name)}
+      `;
+    }
+
+    const uploadBox = input ? input.closest(".upload-controls") : null;
+    if (uploadBox) uploadBox.classList.remove("input-error");
+
+    localStorage.setItem(`file-${num}-data`, JSON.stringify({
+      file: { name: file.name, size: file.size },
+      type
+    }));
+
+    updateFileList();
+  }
+}
+
+// ---------- REMOVE FILE ----------
+window.removeFile = function (fileNumber) {
+  uploadedFiles[fileNumber] = null;
+  const input = document.getElementById(`file${fileNumber}`);
+  if (input) input.value = "";
+  const status = document.getElementById(`status${fileNumber}`);
+  if (status) status.textContent = "No file chosen";
+
+  const uploadBox = input.closest(".upload-controls");
+  if (uploadBox) uploadBox.classList.add("input-error");
+
+  localStorage.removeItem(`file-${fileNumber}-data`);
+  updateFileList();
+  showNotification("File removed. Please upload a file for this slot.", "error");
+};
+
+  // Update the file list table after restoring
+  updateFileList();
+
+// =====================================================
+// HANDLE FILE UPLOAD AND SAVE FULL DATA
+// =====================================================
+function handleFileUpload(num, label) {
+  const input = document.getElementById(`file${num}`);
+  const status = document.getElementById(`status${num}`);
+  const file = input && input.files ? input.files[0] : null;
+
+  if (file) {
+    const type = label || (input.dataset && input.dataset.type) || "Required";
+    uploadedFiles[num] = { file, type };
+
+    if (status) {
+      status.innerHTML = `
+        <i class="fa-solid fa-circle-check" style="color:#28a745;"></i>
+        ${escapeHtml(file.name)}
+      `;
+    }
+
+    const uploadBox = input ? input.closest(".upload-controls") : null;
+    if (uploadBox) uploadBox.classList.remove("input-error");
+
+    // Save full uploaded file data in localStorage
+    localStorage.setItem(`file-${num}-data`, JSON.stringify({
+      file: { name: file.name, size: file.size },
+      type
+    }));
+
+    updateFileList();
+  }
+}
+
+// =====================================================
+// REMOVE FILE & LOCALSTORAGE ENTRY
+// =====================================================
+window.removeFile = function (fileNumber) {
+  uploadedFiles[fileNumber] = null;
+  const input = document.getElementById(`file${fileNumber}`);
+  if (input) input.value = "";
+  const status = document.getElementById(`status${fileNumber}`);
+  if (status) status.textContent = "No file chosen";
+
+  const uploadBox = input.closest(".upload-controls");
+  if (uploadBox) uploadBox.classList.add("input-error");
+
+  // Remove from localStorage
+  localStorage.removeItem(`file-${fileNumber}-data`);
+
+  updateFileList();
+  showNotification("File removed. Please upload a file for this slot.", "error");
+};
+
 
 // =====================================================
 // Initialize: optionally call updateFileList to show initial state

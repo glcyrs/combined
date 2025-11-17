@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Navigate pages based on step
       switch (index) {
-      case 0: window.location.href = "welcome.html"; break;
+      case 0: window.location.href = "index.html"; break;
       case 1: window.location.href = "readfirst.html"; break;
       case 2: window.location.href = "confirmation.html"; break;
       case 3: window.location.href = "aap.html"; break;

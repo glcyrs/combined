@@ -187,7 +187,7 @@
   </div>
 </div>
 
- <!-- education -->
+<!-- education -->
  <div class="container2">
     <div class="section-header2">Educational Information</div>
     
@@ -199,13 +199,13 @@
       <div class="form-group">
         <label class="form-label"><span class="required">*</span> Senior High School (SHS)</label>
         <div class="form-control-wrap"></div>
-        <input type="text" class="form-input" placeholder="" required>
+        <input type="text" class="form-input" name="shsName" required>
       </div>
 
       <div class="form-group">
         <label class="form-label">SHS Email (Optional)</label>
         <div class="form-control-wrap"></div>
-        <input type="email" class="form-input" placeholder="">
+        <input type="email" class="form-input" name="shsEmail">
       </div>
 
       <div class="form-group">
@@ -217,11 +217,11 @@
             <label for="private">Private school</label>
           </div>
           <div class="radio-option">
-            <input type="radio" id="public" name="schoolType" value="public" required>
+            <input type="radio" id="public" name="schoolType" value="public">
             <label for="public">Public school</label>
           </div>
           <div class="radio-option">
-            <input type="radio" id="als" name="schoolType" value="als" required>
+            <input type="radio" id="als" name="schoolType" value="als">
             <label for="als">Alternative Learning School</label>
           </div>
         </div>
@@ -230,7 +230,7 @@
       <div class="form-group">
         <label class="form-label"><span class="required">*</span> Track</label>
         <div class="form-control-wrap"></div>
-        <select class="form-input" required>
+        <select class="form-input" name="track" required>
           <option value="">Select track...</option>
           <option value="academic">Academic</option>
           <option value="arts">Arts and Design</option>
@@ -242,7 +242,7 @@
       <div class="form-group">
         <label class="form-label">Strand</label>
         <div class="form-control-wrap"></div>
-        <select class="form-input" required>
+        <select class="form-input" name="strand" required>
           <option value="">Select strand...</option>
           <option value="stem">Science, Technology, Engineering and Mathematics (STEM)</option>
           <option value="abm">Accountancy, Business and Management (ABM)</option>
@@ -255,19 +255,19 @@
       <div class="form-group">
         <label class="form-label">Specialization</label>
         <div class="form-control-wrap"></div>
-        <input type="text" class="form-input" placeholder="">
+        <input type="text" class="form-input" name="specialization">
       </div>
 
       <div class="form-group">
         <label class="form-label"><span class="required">*</span> Junior HS Completion Year</label>
         <div class="form-control-wrap"></div>
-        <input type="text" class="form-input" placeholder="" required>
+        <input type="text" class="form-input" name="jhsCompletionYear" required>
       </div>
 
       <div class="form-group">
         <label class="form-label">Senior HS Completion Year</label>
         <div class="form-control-wrap"></div>
-        <input type="text" class="form-input" placeholder="" required>
+        <input type="text" class="form-input" name="shsCompletionYear" required>
       </div>
 
       <div class="form-group category-section">
@@ -279,7 +279,7 @@
             <label for="regular">Regular Admission</label>
           </div>
           <div class="radio-option vertical">
-            <input type="radio" id="als-cat" name="category" value="als" >
+            <input type="radio" id="als-cat" name="category" value="als">
             <label for="als-cat">Alternative Learning System</label>
           </div>
           <div class="radio-option vertical">
@@ -298,7 +298,7 @@
 
     <div class="content1">
       <div class="table-title">Junior High School Final Grades</div>
-      <table class="grades-table" required>
+      <table class="grades-table">
         <thead>
           <tr>
             <th rowspan="2">Subjects</th>
@@ -311,15 +311,15 @@
         <tbody>
           <tr>
             <td class="subject-name">Mathematics</td>
-            <td><input type="number" min="0" max="100" value="0"></td>
+            <td><input type="number" name="jhsMath" min="0" max="100"></td>
           </tr>
           <tr>
             <td class="subject-name">Science</td>
-            <td><input type="number" min="0" max="100" value="0"></td>
+            <td><input type="number" name="jhsScience" min="0" max="100"></td>
           </tr>
           <tr>
             <td class="subject-name">English</td>
-            <td><input type="number" min="0" max="100" value="0"></td>
+            <td><input type="number" name="jhsEnglish" min="0" max="100"></td>
           </tr>
         </tbody>
       </table>
@@ -327,7 +327,7 @@
 
    <div class="content2">
   <div class="table-title">Junior High School Final Grades</div>
-  <table class="grades-table2" required>
+  <table class="grades-table2">
     <thead>
       <tr>
         <th colspan="9" class="semester-header">Grade 11</th>
@@ -350,80 +350,81 @@
     </thead>
 
     <tbody>
+      <!-- Each subject row now has unique names -->
       <tr>
         <td class="subject-name2">MATH</td>
         <td class="priority-cell">Pre-Calculus</td>
         <td class="alternative-cell">
-          <select>
-            <option> </option>
+          <select name="g11MathAlt1">
+            <option></option>
             <option>General Mathematics</option>
-          </select></td>
-      
-        <td><input type="number" min="0" max="100" value="0"></td>
-        <td><input type="checkbox"></td>
+          </select>
+        </td>
+        <td><input type="number" name="g11MathGrade1" min="0" max="100"></td>
+        <td><input type="checkbox" name="g11MathNA1"></td>
 
         <td class="priority-cell">Basic Calculus</td>
         <td class="alternative-cell">
-          <select>
-            <option> </option>
+          <select name="g11MathAlt2">
+            <option></option>
             <option>Statistics and Probability</option>
-          </select></td>
-
-        <td><input type="number" min="0" max="100" value="0"></td>
-        <td><input type="checkbox"></td>
+          </select>
+        </td>
+        <td><input type="number" name="g11MathGrade2" min="0" max="100"></td>
+        <td><input type="checkbox" name="g11MathNA2"></td>
       </tr>
 
       <tr>
         <td class="subject-name2">SCIENCE</td>
-         <td class="priority-cell">Earth Science</td>
+        <td class="priority-cell">Earth Science</td>
         <td class="alternative-cell">
-          <select>
-            <option> </option>
+          <select name="g11ScienceAlt1">
+            <option></option>
             <option>General Chemistry II</option>
             <option>General Physics I</option>
             <option>General Biology I</option>
             <option>Disaster Readiness & Risk Reduction</option>
-          </select></td>
-      
-        <td><input type="number" min="0" max="100" value="0"></td>
-        <td><input type="checkbox"></td>
+          </select>
+        </td>
+        <td><input type="number" name="g11ScienceGrade1" min="0" max="100"></td>
+        <td><input type="checkbox" name="g11ScienceNA1"></td>
 
         <td class="priority-cell">General Chemistry I</td>
         <td class="alternative-cell">
-          <select>
-            <option> </option>
+          <select name="g11ScienceAlt2">
+            <option></option>
             <option>General Chemistry II</option>
             <option>General Physics I</option>
             <option>General Biology I</option>
             <option>Disaster Readiness & Risk Reduction</option>
-          </select></td>
-      
-        <td><input type="number" min="0" max="100" value="0"></td>
-        <td><input type="checkbox"></td>
-        </tr>
+          </select>
+        </td>
+        <td><input type="number" name="g11ScienceGrade2" min="0" max="100"></td>
+        <td><input type="checkbox" name="g11ScienceNA2"></td>
+      </tr>
 
       <tr>
         <td class="subject-name2">ENGLISH</td>
-         <td class="priority-cell">Oral Communication</td>
+        <td class="priority-cell">Oral Communication</td>
         <td class="alternative-cell">
-          <select>
-            <option> </option>
+          <select name="g11EnglishAlt1">
+            <option></option>
             <option>English for Academic Purposes</option>
-          </select></td>
-      
-        <td><input type="number" min="0" max="100" value="0"></td>
-        <td><input type="checkbox"></td>
+          </select>
+        </td>
+        <td><input type="number" name="g11EnglishGrade1" min="0" max="100"></td>
+        <td><input type="checkbox" name="g11EnglishNA1"></td>
 
         <td class="priority-cell">Reading and Writing</td>
-        <td class="alternative-cell">
-          </td>
-
-        <td><input type="number" min="0" max="100" value="0"></td>
-        <td><input type="checkbox"></td>
+        <td class="alternative-cell"></td>
+        <td><input type="number" name="g11EnglishGrade2" min="0" max="100"></td>
+        <td><input type="checkbox" name="g11EnglishNA2"></td>
       </tr>
+
     </tbody>
   </table>
 </div>
+
 
       <div class="note-text">* N/A = Not Available</div>
      

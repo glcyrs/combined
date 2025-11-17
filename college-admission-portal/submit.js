@@ -14,7 +14,7 @@ document.querySelectorAll('.grade-card').forEach((card, index) => {
 
 // ====== Map pages to step index ======
 const pageToStep = {
-  "welcome.html": 0,
+  "index.html": 0,
   "readfirst.html": 1,
   "confirmation.html": 2,
   "aap.html": 3,
@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Navigate to the corresponding page
       const pageMap = [
-        "welcome.html",
+        "index.html",
         "readfirst.html",
         "confirmation.html",
         "aap.html",
@@ -279,10 +279,17 @@ if (!canvas) {
   canvas.addEventListener('pointerleave', pointerUpHandler);
 
   if (certifyCheckbox) {
-    certifyCheckbox.addEventListener('change', () => {
-      checkSubmitEligibility();
-    });
+  // LOAD SAVED CHECKBOX STATE
+  const savedCheck = localStorage.getItem("savedCertify");
+  if (savedCheck === "true") {
+    certifyCheckbox.checked = true;
   }
+
+  certifyCheckbox.addEventListener('change', () => {
+    localStorage.setItem("savedCertify", certifyCheckbox.checked ? "true" : "false");
+    checkSubmitEligibility();
+  });
+}
 
   if (submitBtn) {
     submitBtn.addEventListener('click', (e) => {
@@ -302,7 +309,7 @@ if (!canvas) {
         overlay.style.display = 'flex';
         setTimeout(() => {
           overlay.style.display = 'none';
-          window.location.href = 'landing.html';
+          window.location.href = 'educattach.html';
         }, 2500);
       }
     });
@@ -317,4 +324,52 @@ if (!canvas) {
   }
 
   checkSubmitEligibility();
+}
+
+  // =====================================================
+// SIGNATURE SAVING / RESTORING (Upload + Drawing)
+// =====================================================
+
+// Save signature image or canvas drawing
+function saveSignature() {
+  let data = "";
+
+  if (signatureImage && signatureImage.style.display === "block") {
+    // Uploaded image
+    data = signatureImage.src;
+  } else if (canvas && canvas.style.display === "block") {
+    // Drawn signature
+    data = canvas.toDataURL("image/png");
+  }
+
+  if (data) {
+    localStorage.setItem("savedSignature", data);
+  }
+}
+
+// Restore saved signature
+function loadSignature() {
+  const saved = localStorage.getItem("savedSignature");
+  if (!saved) return false;
+
+  // Uploaded Image
+  if (!saved.startsWith("data:image/png")) {
+    signatureImage.src = saved;
+    showImage();
+    hasSignature = true;
+    return true;
+  }
+
+  // Drawn Signature
+  const img = new Image();
+  img.onload = () => {
+    showCanvas();
+    fitSignatureCanvas();
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    hasSignature = true;
+    checkSubmitEligibility();
+  };
+  img.src = saved;
+
+  return true;
 }

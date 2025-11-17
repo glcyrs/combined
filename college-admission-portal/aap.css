@@ -237,6 +237,7 @@ body {
 .step.active p {
   color: #28a745;
 }
+
 .aap-section {
   display: flex;
   justify-content: center;
@@ -380,24 +381,21 @@ body {
 }
 
 .error-notif {
-  display: none; /* hidden by default */
   position: fixed;
-  top: 20px;          /* distance from top */
+  top: 20px;
   left: 50%;
-  transform: translateX(-50%); /* center horizontally */
-  background-color: #f8d7da;
-  color: #721c24;
-  padding: 15px 25px;
-  border: 1px solid #f5c6cb;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  font-family: Arial, sans-serif;
-  z-index: 1000;
+  transform: translateX(-50%);
+  background: #ff4d4d;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 6px;
+  display: none;
   opacity: 0;
-  transition: opacity 1s ease-in-out;
+  transition: opacity .8s;
+  z-index: 9999;
+  font-weight: 600;
 }
 
 .error {
-  border: 2px solid #dc3535;
-  border-radius: 5px;
+  border: 1px solid red !important;
 }

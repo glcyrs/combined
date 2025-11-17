@@ -1,156 +1,312 @@
 // =====================================================
+// aap.js — patched: save progress + clear highlights fixes
+// =====================================================
+
+// =====================================================
 // GRADE CARD DOWNLOAD ALERT
 // =====================================================
 const downloads = [
-  'assets/grades_form_1.pdf', // for the first card
-  'assets/grades_form_2.pdf'  // for the second card
+  'assets/grades_form_1.pdf',
+  'assets/grades_form_2.pdf'
 ];
 
 document.querySelectorAll('.grade-card').forEach((card, index) => {
   card.addEventListener('click', () => {
     const link = document.createElement('a');
     link.href = downloads[index];
-    link.download = downloads[index].split('/').pop(); // set filename
+    link.download = downloads[index].split('/').pop();
     link.click();
   });
 });
 
 // =====================================================
-// EXTRA FIELD TOGGLING
+// SAFE PAGE NAME HANDLING
 // =====================================================
-document.getElementById('transferred-yes').addEventListener('change', () => {
-    document.getElementById('transfer-fields').classList.remove('hidden');
-});
+let rawPage = window.location.pathname.split("/").pop().toLowerCase();
+rawPage = rawPage.split("?")[0].split("#")[0];
+let currentPage = rawPage === "" ? "index.html" : rawPage;
 
-document.getElementById('transferred-no').addEventListener('change', () => {
-    document.getElementById('transfer-fields').classList.add('hidden');
-    document.getElementById('transferredFrom').value = '';
-    document.getElementById('transferredYear').value = '';
-});
+// Page map (index -> filename)
+const pageMap = [
+  "index.html",
+  "readfirst.html",
+  "confirmation.html",
+  "aap.html",
+  "personal.html",
+  "educattach.html",
+  "programs.html",
+  "form.html",
+  "submit.html"
+];
 
-document.getElementById('bsu-yes').addEventListener('change', () => {
-    document.getElementById('bsu-field').classList.remove('hidden');
-});
-
-document.getElementById('bsu-no').addEventListener('change', () => {
-    document.getElementById('bsu-field').classList.add('hidden');
-});
-
-// =====================================================
-// CLEAR ERRORS WHEN USER TYPES OR CHANGES
-// =====================================================
-document.querySelectorAll('input, select').forEach(el => {
-    el.addEventListener('input', () => {
-        el.classList.remove('error');
-        const q = el.closest('.question');
-        if (q) q.classList.remove('error');
-        const notif = document.getElementById('error-notif');
-        notif.style.display = 'none';
-    });
-});
+let currentStep = pageMap.indexOf(currentPage);
+if (currentStep < 0) currentStep = 0;
 
 // =====================================================
-// SHOW NOTIFICATION FUNCTION
+// UTIL: storage key (single source of truth)
+// =====================================================
+const STORAGE_KEY = "maxUnlockedStep";
+
+// Load saved progress (max unlocked step)
+let maxUnlockedStep = parseInt(localStorage.getItem(STORAGE_KEY));
+if (isNaN(maxUnlockedStep)) maxUnlockedStep = 0;
+
+// If user reached a new page (arrived at a later step), update storage
+if (currentStep > maxUnlockedStep) {
+  maxUnlockedStep = currentStep;
+  localStorage.setItem(STORAGE_KEY, String(maxUnlockedStep));
+}
+
+// =====================================================
+// EXTRA FIELD TOGGLING (transferred / bsu)
+// =====================================================
+const tYes = document.getElementById('transferred-yes');
+const tNo = document.getElementById('transferred-no');
+const bYes = document.getElementById('bsu-yes');
+const bNo = document.getElementById('bsu-no');
+
+if (tYes) tYes.addEventListener('change', () => {
+  const tf = document.getElementById('transfer-fields');
+  if (tf) tf.classList.remove('hidden');
+});
+if (tNo) tNo.addEventListener('change', () => {
+  const tf = document.getElementById('transfer-fields');
+  if (tf) tf.classList.add('hidden');
+  const f = document.getElementById('transferredFrom');
+  const y = document.getElementById('transferredYear');
+  if (f) f.value = '';
+  if (y) y.value = '';
+});
+if (bYes) bYes.addEventListener('change', () => {
+  const bf = document.getElementById('bsu-field');
+  if (bf) bf.classList.remove('hidden');
+});
+if (bNo) bNo.addEventListener('change', () => {
+  const bf = document.getElementById('bsu-field');
+  if (bf) bf.classList.add('hidden');
+});
+
+// =====================================================
+// SHOW NOTIFICATION
 // =====================================================
 function showNotification(message) {
-    const notif = document.getElementById('error-notif');
-    notif.textContent = message;
-    notif.style.display = 'block';
-    
-    // Force a short delay to ensure opacity transition works
-    setTimeout(() => {
-        notif.style.opacity = 1; // fade in
-    }, 50);
+  const notif = document.getElementById('error-notif');
+  if (!notif) return;
+  notif.textContent = message;
+  notif.style.display = 'block';
+  setTimeout(() => { notif.style.opacity = 1; }, 30);
 
-    // Keep notification visible for 6 seconds
-    setTimeout(() => {
-        notif.style.opacity = 0; // start fade out
-        // Completely hide after fade-out
-        setTimeout(() => {
-            notif.style.display = 'none';
-        }, 1000); // match CSS transition duration
-    }, 6000); // visible for 6 seconds
+  setTimeout(() => {
+    notif.style.opacity = 0;
+    setTimeout(() => { notif.style.display = 'none'; }, 600);
+  }, 5000);
 }
 
 // =====================================================
-// HANDLE NEXT BUTTON
+// FORM AUTO-SAVE + RESTORE (including radios & checkboxes)
 // =====================================================
-function handleNext() {
-    let error = false;
 
-    const aapField = document.getElementById('aapField');
-    const AFProg = document.querySelector('input[name="aap"]:checked');
+// Save function for individual fields
+function saveField(field) {
+  if (!field || !field.name) return;
+  const key = "field_" + field.name;
 
-  if (!AFProg) {
-    aapField.classList.add('error');
-    error = true;
+  if (field.type === "checkbox") {
+    localStorage.setItem(key, field.checked ? "true" : "false");
+  } else if (field.type === "radio") {
+    // save by radio group name: store selected value (if checked)
+    if (field.checked) localStorage.setItem(key, field.value);
   } else {
-    aapField.classList.remove('error');
+    localStorage.setItem(key, field.value);
+  }
+}
+
+// Restore all fields on load
+function restoreFields() {
+  document.querySelectorAll("input, select, textarea").forEach(field => {
+    const key = "field_" + (field.name || "");
+    const saved = localStorage.getItem(key);
+
+    if (field.type === "radio") {
+      if (saved !== null && field.value === saved) {
+        field.checked = true;
+      }
+    } else if (field.type === "checkbox") {
+      if (saved !== null) field.checked = saved === "true";
+    } else {
+      if (saved !== null) field.value = saved;
+    }
+  });
+
+  // Also restore visibility of toggled areas based on saved values
+  // transferred
+  const transferredSaved = localStorage.getItem("field_transferred");
+  if (transferredSaved === "yes") {
+    const tf = document.getElementById('transfer-fields');
+    if (tf) tf.classList.remove('hidden');
+  } else {
+    const tf = document.getElementById('transfer-fields');
+    if (tf) tf.classList.add('hidden');
   }
 
-
-
-
-
-    /*
-    const aap = document.querySelector('input[name="aap"]:checked');
-
-    // Reset previous errors
-    document.querySelectorAll('.aap-option input').forEach(input => input.classList.remove('error'));
-
-    if (!aap) {
-        // Highlight all radio buttons (optional)
-        document.querySelectorAll('input[name="aap"]').forEach(input => input.classList.add('error'));
-        error = true;
-    }
-    */
-    if (error) {
-        showNotification("Please complete all required fields before proceeding.");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        return; // STOP here, do not redirect
-    }
-
-    // SUCCESS → go to next page
-    window.location.href = "personal.html";
+  // bsu
+  const bsuSaved = localStorage.getItem("field_bsuGraduate");
+  if (bsuSaved === "yes") {
+    const bf = document.getElementById('bsu-field');
+    if (bf) bf.classList.remove('hidden');
+  } else {
+    const bf = document.getElementById('bsu-field');
+    if (bf) bf.classList.add('hidden');
+  }
 }
 
-// ====== Step click navigation ======
-const steps = document.querySelectorAll('.step'); // your step elements
-let maxUnlockedStep = 0; // adjust this according to user progress
-let currentStep = 0;
+// Attach listeners to save on change/input and clear errors
+document.querySelectorAll("input, select, textarea").forEach(field => {
+  // Save and clear on change (covers select, checkbox, radio)
+  field.addEventListener("change", function () {
+    // Special case: radio groups — store the selected value for the group
+    if (this.type === "radio") {
+      const key = "field_" + this.name;
+      if (this.checked) localStorage.setItem(key, this.value);
+    } else if (this.type === "checkbox") {
+      const key = "field_" + this.name;
+      localStorage.setItem(key, this.checked ? "true" : "false");
+    } else {
+      saveField(this);
+    }
 
-steps.forEach((step, index) => {
-    step.addEventListener("click", () => {
-        // Only allow clicking unlocked steps
-        if (index > maxUnlockedStep) return;
+    // Also special-case some named toggles so visibility restores
+    if (this.name === "transferred") {
+      localStorage.setItem("field_transferred", this.value);
+    }
+    if (this.name === "bsuGraduate") {
+      localStorage.setItem("field_bsuGraduate", this.value);
+    }
 
-        // Update current step
-        currentStep = index;
-        updateSteps(); // optional: update step UI if you have this function
+    // clear highlight and notif
+    this.classList.remove("error");
+    const q = this.closest(".question");
+    if (q) q.classList.remove("error");
+    const notif = document.getElementById("error-notif");
+    if (notif) notif.style.display = "none";
+  });
 
-        // Navigate pages based on step
-        const pageMap = [
-            "welcome.html",
-            "readfirst.html",
-            "confirmation.html",
-            "aap.html",
-            "personal.html",
-            "educattach.html",
-            "programs.html",
-            "form.html",
-            "submit.html"
-        ];
+  // Save on input for text-like fields
+  field.addEventListener("input", function () {
+    if (this.type !== "radio" && this.type !== "checkbox") saveField(this);
+    this.classList.remove("error");
+    const q = this.closest(".question");
+    if (q) q.classList.remove("error");
+    const notif = document.getElementById("error-notif");
+    if (notif) notif.style.display = "none";
+  });
 
-        if (pageMap[index]) {
-            window.location.href = pageMap[index];
-        }
-    });
+  // For accessibility: also clear errors on click (useful for radios)
+  field.addEventListener("click", function () {
+    this.classList.remove("error");
+    const q = this.closest(".question");
+    if (q) q.classList.remove("error");
+    const notif = document.getElementById("error-notif");
+    if (notif) notif.style.display = "none";
+  });
 });
 
-// Optional: function to update step UI
-function updateSteps() {
-    steps.forEach((step, idx) => {
-        step.classList.toggle('active', idx === currentStep);
-        step.classList.toggle('unlocked', idx <= maxUnlockedStep);
-    });
+// Restore on startup
+restoreFields();
+
+// =====================================================
+// STEP NAVIGATION (clickable unlocked steps + save)
+// =====================================================
+
+const steps = document.querySelectorAll(".step");
+
+// Update UI function
+function updateStepsUI() {
+  steps.forEach((stepEl, idx) => {
+    stepEl.classList.toggle("active", idx === currentStep);
+    stepEl.classList.toggle("unlocked", idx <= maxUnlockedStep);
+
+    // ensure pointer and cursor
+    stepEl.style.pointerEvents = (idx <= maxUnlockedStep) ? "auto" : "none";
+    stepEl.style.cursor = (idx <= maxUnlockedStep) ? "pointer" : "default";
+  });
 }
+
+// Make steps interactive
+steps.forEach((stepEl, idx) => {
+  if (idx <= maxUnlockedStep) {
+    // attach handler — using delegation here ensures duplicates aren't attached on reload,
+    // but we guard by removing previous handlers in case script is re-run
+    stepEl.addEventListener('click', (ev) => {
+      // Save progress: if user clicked ahead of current max, expand unlocked range
+      if (idx > maxUnlockedStep) {
+        maxUnlockedStep = idx;
+        localStorage.setItem(STORAGE_KEY, String(maxUnlockedStep));
+      }
+
+      // Save the chosen step as current progress as well (so toggling persists)
+      localStorage.setItem("lastVisitedStep", String(idx));
+
+      // navigate to corresponding page
+      const target = pageMap[idx] || pageMap[0];
+      // small delay to ensure storage writes happen
+      setTimeout(() => {
+        window.location.href = target;
+      }, 50);
+    });
+  }
+});
+
+// ensure UI reflects current values
+updateStepsUI();
+
+// =====================================================
+// NEXT BUTTON HANDLER (AAP page)
+// =====================================================
+function handleNext() {
+  const aapField = document.getElementById('aapField');
+  const AFProg = document.querySelector('input[name="aap"]:checked');
+  let error = false;
+
+  if (!AFProg) {
+    if (aapField) aapField.classList.add("error");
+    error = true;
+  } else {
+    if (aapField) aapField.classList.remove("error");
+    // save radio choice
+    const key = "field_aap";
+    localStorage.setItem(key, AFProg.value);
+  }
+
+  if (error) {
+    showNotification("Please complete all required fields before proceeding.");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+
+  // Unlock next step and save progress
+  const next = Math.max(maxUnlockedStep, currentStep + 1);
+  maxUnlockedStep = next;
+  localStorage.setItem(STORAGE_KEY, String(maxUnlockedStep));
+
+  // Also store last visited/current step
+  localStorage.setItem("lastVisitedStep", String(currentStep + 1));
+
+  // Navigate
+  window.location.href = "personal.html";
+}
+
+// Expose handleNext to global scope so onclick HTML can call it
+window.handleNext = handleNext;
+
+// =====================================================
+// OPTIONAL: helper to clear all stored fields (for debugging)
+// =====================================================
+// function clearSavedFields() {
+//   Object.keys(localStorage).forEach(k => {
+//     if (k.startsWith("field_") || k === STORAGE_KEY || k === "lastVisitedStep") {
+//       localStorage.removeItem(k);
+//     }
+//   });
+// }
+// window.clearSavedFields = clearSavedFields;

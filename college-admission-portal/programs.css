@@ -244,7 +244,7 @@ body {
     margin: 0 auto;             /* center horizontally */
     background-color: white;
     border-radius: 8px;
-    border: 2px solid #353434e0; 
+    border: 4px solid #EEEEEE; 
     padding: 20px;          /* optional internal padding */
     box-sizing: border-box; /* include padding in width/height */
 }
@@ -570,9 +570,9 @@ body {
   background-color: #fff0f0 !important;
 }
 
-/* highlight row with missing data */
+/* highlight row with missing data 
 .row-error {
   background-color: #fff8f8;
   border-radius: 8px;
   padding: 5px 0;
-}
+}*/

@@ -1,10 +1,3 @@
-/*
-document.querySelectorAll('.grade-card').forEach(card => {
-  card.addEventListener('click', () => {
-    alert('Downloading form...');
-  });
-});
-*/
 
 const downloads = [
   'assets/grades_form_1.pdf', // for the first card
@@ -57,30 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
       await updateSectionVisibility();
     }
   });
-  /*
-  //for confirmation part
-    // --- Delegated handler: ensure Confirmation "Next" always triggers step 3 ---
-  document.addEventListener('click', (e) => {
-    // find the nearest button clicked
-    const btn = e.target.closest && e.target.closest('.next-btn');
-    if (!btn) return;
-
-    // check if this button is inside the confirmation section
-    const inConfirmation = !!btn.closest && !!btn.closest('#confirmation-section');
-    if (inConfirmation) {
-      console.log('🖱️ Delegated handler: Confirmation Next clicked — forcing gotoStep(3)');
-      // allow normal flow unlocking if needed
-      if (maxUnlockedStep < 3) maxUnlockedStep = 3;
-      currentStep = 3;
-      updateSteps();
-      updateSectionVisibility().catch(err => console.error('updateSectionVisibility error:', err));
-      // prevent any default form submit behavior
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  });
-  */
-
+  
   function updateSteps() {
     steps.forEach((step, index) => {
       const circle = step.querySelector("span");
@@ -127,71 +97,24 @@ document.addEventListener("DOMContentLoaded", () => {
       await updateSectionVisibility();
     });
   }
-  /*
-  async function updateSectionVisibility() {
-    const readFirst = document.querySelector("#read-first-section");
-    const confirmation = document.querySelector("#confirmation-section");
+  
+function unlockAllIfCompleted() {
+  if (maxUnlockedStep >= steps.length - 1) {
+    steps.forEach(step => {
+      step.classList.add("clickable");
+      step.style.pointerEvents = "auto";
 
-    if (currentStep === 0) {
-      // Show welcome only
-      welcomeSection.style.display = "flex";
-      if (readFirst) readFirst.remove();
-      if (confirmation) confirmation.remove();
-     
+      const icon = step.querySelector("i");
+      const label = step.querySelector("p");
 
-    } else if (currentStep === 1) {
-      // Show read first
-      welcomeSection.style.display = "none";
-      if (confirmation) confirmation.remove();
+      if (icon) icon.style.opacity = "1";
+      if (label) label.style.opacity = "1";
+    });
 
-      if (!readFirst) {
-        try {
-          const response = await fetch("readfirst.html");
-          const html = await response.text();
-
-          const tempDiv = document.createElement("div");
-          tempDiv.innerHTML = html;
-
-          const readFirstContent = tempDiv.querySelector("#read-first-section");
-          document.body.appendChild(readFirstContent);
-
-          const script = document.createElement("script");
-          script.src = "readfirst.js";
-          document.body.appendChild(script);
-
-
-        } catch (err) {
-          console.error("Error loading Read First section:", err);
-        }
-      }
-     
-    } else if (currentStep === 2) {
-      // Show confirmation
-      welcomeSection.style.display = "none";
-      if (readFirst) readFirst.remove();
-
-      if (!confirmation) {
-        try {
-          const response = await fetch("confirmation.html");
-          const html = await response.text();
-
-          const tempDiv = document.createElement("div");
-          tempDiv.innerHTML = html;
-
-          const confirmationContent = tempDiv.querySelector("#confirmation-section");
-          document.body.appendChild(confirmationContent);
-
-          const script = document.createElement("script");
-          script.src = "confirmation.js";
-          document.body.appendChild(script);
-    
-        } catch (err) {
-          console.error("Error loading Confirmation section:", err);
-        }
-      }
-    }
+    console.log(" All steps unlocked → all clickable");
   }
-  */
+}
+
   async function updateSectionVisibility() {
     const readFirst = document.querySelector("#read-first-section");
     const confirmation = document.querySelector("#confirmation-section");
@@ -323,65 +246,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   }
-
-
-  /*
-  async function updateSectionVisibility() {
-    if (currentStep === 0) {
-      welcomeSection.style.display = "flex";
-      const readFirst = document.querySelector("#read-first-section");
-      if (readFirst) readFirst.remove();
-    } else if (currentStep === 1) {
-      welcomeSection.style.display = "none";
-
-      // Check if already loaded
-      if (!document.querySelector("#read-first-section")) {
-        try {
-          const response = await fetch("readfirst.html");
-          const html = await response.text();
-
-          const tempDiv = document.createElement("div");
-          tempDiv.innerHTML = html;
-
-          const readFirstContent = tempDiv.querySelector("#read-first-section");
-          document.body.appendChild(readFirstContent);
-
-          // Load readfirst.js dynamically
-          const script = document.createElement("script");
-          script.src = "readfirst.js";
-          document.body.appendChild(script);
-        } catch (err) {
-          console.error("Error loading Read First section:", err);
-        }
-      }
-    } else if (currentStep === 2) {
-      welcomeSection.style.display = "none";
-
-      const readFirst = document.querySelector("#read-first-section");
-      if (readFirst) readFirst.remove();
-
-      // If confirmation not already loaded
-      if (!document.querySelector("#confirmation-section")) {
-        try {
-          const response = await fetch("confirmation.html");
-          const html = await response.text();
-
-          const tempDiv = document.createElement("div");
-          tempDiv.innerHTML = html;
-          const confirmationContent = tempDiv.querySelector("#confirmation-section");
-          document.body.appendChild(confirmationContent);
-
-          // Load confirmation.js dynamically
-          const script = document.createElement("script");
-          script.src = "confirmation.js";
-          document.body.appendChild(script);
-        } catch (err) {
-          console.error("Error loading Confirmation section:", err);
-        }
-      }
-    }
-  }
-  */
 
   updateSteps();
   updateSectionVisibility();

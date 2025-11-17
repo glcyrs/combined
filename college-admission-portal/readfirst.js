@@ -1,45 +1,95 @@
+const downloads = [
+  'assets/grades_form_1.pdf', // for the first card
+  'assets/grades_form_2.pdf'  // for the second card
+];
 
-// readfirst.js
-/*
-document.addEventListener("DOMContentLoaded", () => {
-  const continueBtn = document.querySelector(".continue-btn");
-  if (continueBtn) {
-    continueBtn.addEventListener("click", () => {
-      window.location.href = "confirmation.html"; // Or next step page
-    });
-  }
+document.querySelectorAll('.grade-card').forEach((card, index) => {
+  card.addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.href = downloads[index];
+    link.download = downloads[index].split('/').pop(); // set filename
+    link.click();
+  });
 });
-*/
-/*
-document.addEventListener("DOMContentLoaded", () => {
-  const nextBtn = document.querySelector(".next-btn");
-  if (nextBtn) {
-    nextBtn.addEventListener("click", () => {
-      window.location.href = "confirmation.html"; // Or next step page
-    });
-  }
-});
-*/
-/*
-console.log("✅ readfirst.js loaded successfully");
-document.addEventListener("DOMContentLoaded", () => {
-  const nextBtn = document.querySelector(".next-btn");
-  
-  if (nextBtn) {
-    nextBtn.addEventListener("click", async () => {
-      // mimic what startButton does but go to step 2
-      const steps = document.querySelectorAll(".step");
-      
-      // Unlock step 2
-      window.maxUnlockedStep = 2;
-      window.currentStep = 2;
 
-      // Trigger the same function as script.js uses
-      document.dispatchEvent(new CustomEvent("gotoStep", { detail: { step: 2 } }));
+// ====== Map pages to step index ======
+const pageToStep = {
+  "index.html": 0,
+  "readfirst.html": 1,
+  "confirmation.html": 2,
+  "aap.html": 3,
+  "personal.html": 4,
+  "educattach.html": 5,
+  "programs.html": 6,
+  "form.html": 7,
+  "submit.html": 8,
+  // add more pages if needed
+};
+
+// ====== Get current page ======
+const currentPage = window.location.pathname.split("/").pop();
+
+// ====== Load progress safely ======
+let savedStep = parseInt(localStorage.getItem("currentStep"));
+let currentStep = pageToStep[currentPage] !== undefined ? pageToStep[currentPage] : (savedStep || 5);
+let maxUnlockedStep = parseInt(localStorage.getItem("maxUnlockedStep")) || currentStep;
+
+document.addEventListener("DOMContentLoaded", () => {
+  const steps = document.querySelectorAll(".step");
+
+  // ====== Update step UI ======
+  function updateSteps() {
+    steps.forEach((step, index) => {
+      // ACTIVE step (green)
+      step.classList.toggle("active", index === currentStep);
+
+      // CLICKABLE or LOCKED
+      if (index <= maxUnlockedStep) {
+        step.classList.add("clickable");
+        step.style.pointerEvents = "auto";
+        step.style.opacity = "1";
+      } else {
+        step.classList.remove("clickable");
+        step.style.pointerEvents = "none";
+        step.style.opacity = "1";
+      }
     });
+
+    // Save progress
+    localStorage.setItem("currentStep", currentStep);
+    localStorage.setItem("maxUnlockedStep", maxUnlockedStep);
   }
+
+  // ====== Step click navigation ======
+  steps.forEach((step, index) => {
+    step.addEventListener("click", () => {
+      if (index > maxUnlockedStep) return; // block locked steps
+
+      currentStep = index;
+      updateSteps();
+
+      // Optional: show section if you have this function
+      if (typeof showSection === "function") showSection(currentStep);
+
+      // Navigate pages based on step
+      switch (index) {
+      case 0: window.location.href = "index.html"; break;
+      case 1: window.location.href = "readfirst.html"; break;
+      case 2: window.location.href = "confirmation.html"; break;
+      case 3: window.location.href = "aap.html"; break;
+      case 4: window.location.href = "personal.html"; break;
+      case 5: window.location.href = "educattach.html"; break;
+      case 6: window.location.href = "programs.html"; break;
+      case 7: window.location.href = "form.html"; break;
+      case 8: window.location.href = "submit.html"; break;
+        // Add more steps/pages here
+      }
+    });
+  });
+
+  // ====== Initial render ======
+  updateSteps();
 });
-*/
 
 console.log("✅ readfirst.js loaded successfully");
 
@@ -59,89 +109,3 @@ const checkNextBtn = setInterval(() => {
     clearInterval(checkNextBtn);
   }
 }, 300);
-
-
-/*
-document.addEventListener("DOMContentLoaded", () => {
-  const nextBtn = document.querySelector(".next-btn");
-
-  if (nextBtn) {
-    nextBtn.addEventListener("click", async () => {
-      const steps = document.querySelectorAll(".step");
-      let currentStep = 2; // 3rd circle (index 2)
-      let maxUnlockedStep = 2;
-
-      async function loadConfirmationSection() {
-        try {
-          const response = await fetch("confirmation.html");
-          const html = await response.text();
-
-          const tempDiv = document.createElement("div");
-          tempDiv.innerHTML = html;
-
-          const confirmationContent = tempDiv.querySelector("#confirmation-section");
-          document.body.appendChild(confirmationContent);
-
-          const script = document.createElement("script");
-          script.src = "confirmation.js";
-          document.body.appendChild(script);
-
-          // Update step indicator
-          steps.forEach(step => step.classList.remove("active"));
-          steps[currentStep].classList.add("active");
-        } catch (err) {
-          console.error("Error loading Confirmation section:", err);
-        }
-      }
-
-      // Remove the Read First section before loading Confirmation
-      const readFirstSection = document.querySelector("#read-first-section");
-      if (readFirstSection) readFirstSection.remove();
-
-      // Load the confirmation section dynamically
-      loadConfirmationSection();
-    });
-  }
-});
-*/
-
-/*
-document.addEventListener("DOMContentLoaded", () => {
-  const nextButton = document.getElementById("go-to-confirmation");
-  if (nextButton) {
-    nextButton.addEventListener("click", async () => {
-      // Update current step to Confirmation
-      const steps = document.querySelectorAll(".step");
-      const currentStep = 2; // 0 = welcome, 1 = read first, 2 = confirmation
-
-      steps.forEach((step, index) => {
-        const circle = step.querySelector("span");
-        step.classList.toggle("active", index === currentStep);
-        circle.style.borderColor = index === currentStep ? "#1a9737" : "#ccc";
-      });
-
-      // Remove Read First section
-      const readFirstSection = document.querySelector("#read-first-section");
-      if (readFirstSection) readFirstSection.remove();
-
-      // Load Confirmation Section dynamically
-      try {
-        const response = await fetch("confirmation.html");
-        const html = await response.text();
-        const tempDiv = document.createElement("div");
-        tempDiv.innerHTML = html;
-
-        const confirmationSection = tempDiv.querySelector("#confirmation-section");
-        document.body.appendChild(confirmationSection);
-
-        // Load confirmation.js dynamically
-        const script = document.createElement("script");
-        script.src = "confirmation.js";
-        document.body.appendChild(script);
-      } catch (err) {
-        console.error("Error loading Confirmation section:", err);
-      }
-    });
-  }
-});
-*/
