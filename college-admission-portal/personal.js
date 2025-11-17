@@ -1175,3 +1175,317 @@ steps.forEach((step, index) => {
     });
   }
 });
+
+// =====================================================
+// ADD THIS CODE TO THE END OF YOUR personal.js FILE
+// =====================================================
+
+// ==================== FIX INCOME RADIO AUTO-SAVE ====================
+function saveIncomeRadio() {
+  const selected = document.querySelector('input[name="income"]:checked');
+  if (!selected) return;
+  
+  // Get the label text next to the radio button
+  const label = selected.parentElement.textContent.trim();
+  localStorage.setItem("income", label);
+  console.log("✅ Income saved:", label);
+}
+
+function loadIncomeRadio() {
+  const saved = localStorage.getItem("income");
+  if (!saved) return;
+  
+  console.log("🔄 Loading income:", saved);
+  
+  const incomeRadios = document.querySelectorAll('input[name="income"]');
+  
+  incomeRadios.forEach(radio => {
+    const label = radio.parentElement.textContent.trim();
+    
+    if (label === saved) {
+      radio.checked = true;
+      console.log("✅ Income restored:", label);
+    }
+  });
+}
+
+// Attach save listeners to income radios
+document.addEventListener("DOMContentLoaded", () => {
+  const incomeRadios = document.querySelectorAll('input[name="income"]');
+  
+  incomeRadios.forEach(radio => {
+    radio.addEventListener("change", saveIncomeRadio);
+  });
+
+  // Restore saved income on page load
+  loadIncomeRadio();
+});
+
+
+// ==================== FIX SIBLINGS YES/NO AUTO-SAVE ====================
+function saveSiblingsChoice() {
+  const selected = document.querySelector('input[name="hasSiblings"]:checked');
+  if (!selected) return;
+  
+  // Determine Yes or No based on ID
+  const choice = selected.id === "hasSiblingsYes" ? "Yes" : "No";
+  localStorage.setItem("hasSiblings", choice);
+  console.log("✅ Siblings choice saved:", choice);
+}
+
+function loadSiblingsChoice() {
+  const saved = localStorage.getItem("hasSiblings");
+  if (!saved) return;
+  
+  console.log("🔄 Loading siblings choice:", saved);
+  
+  if (saved === "Yes") {
+    const yesRadio = document.getElementById("hasSiblingsYes");
+    if (yesRadio) {
+      yesRadio.checked = true;
+      
+      // Show sibling sections
+      document.getElementById("addSiblingHeader").style.display = "block";
+      document.getElementById("addSiblingBox").style.display = "block";
+      document.getElementById("summaryHeader").style.display = "block";
+      document.getElementById("summaryBox").style.display = "block";
+    }
+    console.log("✅ Siblings 'Yes' restored");
+    
+  } else if (saved === "No") {
+    const noRadio = document.getElementById("hasSiblingsNo");
+    if (noRadio) {
+      noRadio.checked = true;
+      
+      // Hide add sibling section
+      document.getElementById("addSiblingHeader").style.display = "none";
+      document.getElementById("addSiblingBox").style.display = "none";
+      document.getElementById("summaryHeader").style.display = "block";
+      document.getElementById("summaryBox").style.display = "block";
+    }
+    console.log("✅ Siblings 'No' restored");
+  }
+}
+
+// Attach save listeners to siblings radios
+document.addEventListener("DOMContentLoaded", () => {
+  const siblingsRadios = document.querySelectorAll('input[name="hasSiblings"]');
+  
+  siblingsRadios.forEach(radio => {
+    radio.addEventListener("change", saveSiblingsChoice);
+  });
+
+  // Restore saved siblings choice on page load
+  loadSiblingsChoice();
+});
+
+
+// ==================== FIX SIBLINGS SUMMARY TABLE AUTO-SAVE ====================
+function saveSiblingsSummary() {
+  const summaryTable = document.querySelector('.siblings-summary-table');
+  if (!summaryTable) return;
+
+  const rows = [];
+  const allRows = summaryTable.querySelectorAll("tr");
+  
+  allRows.forEach(row => {
+    // Skip header and "no siblings" rows
+    if (row.classList.contains('header-row') || 
+        row.querySelector('.no-siblings-text')) {
+      return;
+    }
+    
+    const cells = row.querySelectorAll("td");
+    if (cells.length >= 6) {
+      const rowData = {
+        fullname: cells[1]?.innerText || "",
+        age: cells[2]?.innerText || "",
+        education: cells[3]?.innerText || "",
+        school: cells[4]?.innerText || "",
+        yearGrad: cells[5]?.innerText || ""
+      };
+      rows.push(rowData);
+    }
+  });
+
+  localStorage.setItem("siblingsSummary", JSON.stringify(rows));
+  console.log("✅ Siblings summary saved:", rows.length, "siblings");
+}
+
+function loadSiblingsSummary() {
+  const saved = localStorage.getItem("siblingsSummary");
+  if (!saved) return;
+
+  const summaryTable = document.querySelector('.siblings-summary-table');
+  if (!summaryTable) return;
+
+  try {
+    const rows = JSON.parse(saved);
+    
+    // Remove "No siblings" row if exists
+    const noSiblingsRow = summaryTable.querySelector('.no-siblings-text');
+    if (noSiblingsRow && noSiblingsRow.closest('tr')) {
+      noSiblingsRow.closest('tr').remove();
+    }
+
+    // Clear existing data rows (keep header)
+    const dataRows = summaryTable.querySelectorAll("tr:not(.header-row)");
+    dataRows.forEach(row => row.remove());
+
+    // Add saved rows
+    rows.forEach((rowData, index) => {
+      const newRow = summaryTable.insertRow(-1);
+      newRow.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${rowData.fullname}</td>
+        <td>${rowData.age}</td>
+        <td>${rowData.education}</td>
+        <td>${rowData.school}</td>
+        <td>${rowData.yearGrad}</td>
+        <td><button type="button" class="remove-summary-btn" onclick="removeSummaryRow(this)">X</button></td>
+      `;
+    });
+    
+    console.log("✅ Siblings summary loaded:", rows.length, "siblings");
+  } catch (e) {
+    console.error("❌ Error loading siblings:", e);
+  }
+}
+
+// Clear input table on page load (always start empty)
+function clearSiblingInputTable() {
+  const inputTable = document.getElementById('siblingsTable');
+  if (!inputTable || inputTable.rows.length < 2) return;
+  
+  const inputRow = inputTable.rows[1];
+  
+  if (inputRow.cells[0]) inputRow.cells[0].innerText = '';
+  if (inputRow.cells[1]) inputRow.cells[1].innerText = '';
+  
+  const educationSelect = inputRow.cells[2]?.querySelector('select');
+  if (educationSelect) educationSelect.value = '';
+  
+  if (inputRow.cells[3]) inputRow.cells[3].innerText = '';
+  if (inputRow.cells[4]) inputRow.cells[4].innerText = '';
+  
+  console.log("✅ Input table cleared");
+}
+
+// Load siblings summary and clear input table on page load
+window.addEventListener("DOMContentLoaded", () => {
+  loadSiblingsSummary();
+  clearSiblingInputTable();
+});
+
+
+// ==================== UPDATE EXISTING FUNCTIONS ====================
+
+// Find and replace your addSiblingToSummary function with this:
+window.addSiblingToSummary = function() {
+  const inputTable = document.getElementById('siblingsTable');
+  const summaryTable = document.querySelector('.siblings-summary-table');
+  
+  if (!inputTable || !summaryTable || inputTable.rows.length < 2) return;
+  
+  const inputRow = inputTable.rows[1];
+  const fullnameCell = inputRow.cells[0];
+  const ageCell = inputRow.cells[1];
+  const educationSelect = inputRow.cells[2]?.querySelector('select');
+  const schoolCell = inputRow.cells[3];
+  const yearGradCell = inputRow.cells[4];
+
+  const fullname = fullnameCell?.innerText.trim() || "";
+  const age = ageCell?.innerText.trim() || "";
+  const education = educationSelect?.value.trim() || "";
+  const school = schoolCell?.innerText.trim() || "";
+  const yearGraduated = yearGradCell?.innerText.trim() || "";
+
+  let hasError = false;
+
+  function markError(cell, condition) {
+    if (!cell) return;
+    if (condition) {
+      cell.classList.add("error");
+      hasError = true;
+    } else {
+      cell.classList.remove("error");
+    }
+  }
+
+  markError(fullnameCell, fullname === "");
+  markError(ageCell, age === "");
+  markError(educationSelect, education === "");
+  markError(schoolCell, school === "");
+  markError(yearGradCell, yearGraduated === "");
+
+  if (hasError) return;
+
+  // Remove "No siblings" row if exists
+  const noSiblingsRow = summaryTable.querySelector('.no-siblings-text');
+  if (noSiblingsRow && noSiblingsRow.closest('tr')) {
+    noSiblingsRow.closest('tr').remove();
+  }
+
+  const nextNumber = summaryTable.rows.length;
+  const newRow = summaryTable.insertRow(-1);
+
+  newRow.innerHTML = `
+    <td>${nextNumber}</td>
+    <td>${fullname}</td>
+    <td>${age}</td>
+    <td>${education}</td>
+    <td>${school}</td>
+    <td>${yearGraduated}</td>
+    <td><button type="button" class="remove-summary-btn" onclick="removeSummaryRow(this)">X</button></td>
+  `;
+
+  // Clear input fields
+  fullnameCell.innerText = '';
+  ageCell.innerText = '';
+  educationSelect.value = '';
+  schoolCell.innerText = '';
+  yearGradCell.innerText = '';
+
+  // 🔥 AUTO-SAVE SUMMARY TABLE
+  saveSiblingsSummary();
+  console.log("✅ Sibling added and saved");
+}
+
+// Find and replace your removeSummaryRow function with this:
+window.removeSummaryRow = function(button) {
+  const row = button.closest('tr');
+  const summaryTable = document.querySelector('.siblings-summary-table');
+  
+  if (!row || !summaryTable) return;
+  
+  row.remove();
+
+  // Renumber rows
+  const allRows = summaryTable.querySelectorAll("tr:not(.header-row)");
+  allRows.forEach((r, index) => {
+    const firstCell = r.cells[0];
+    if (firstCell) firstCell.innerText = index + 1;
+  });
+
+  // Show "no siblings" if empty
+  if (allRows.length === 0) {
+    const noRow = summaryTable.insertRow(-1);
+    const cell = noRow.insertCell(0);
+    cell.colSpan = 7;
+    cell.className = 'no-siblings-text';
+    cell.innerText = '**No siblings**';
+  }
+
+  // 🔥 AUTO-SAVE SUMMARY TABLE
+  saveSiblingsSummary();
+  console.log("✅ Sibling removed and saved");
+}
+
+
+// ==================== DEBUG CONSOLE ====================
+window.addEventListener("DOMContentLoaded", () => {
+  console.log("=== 📊 AUTO-SAVE STATUS ===");
+  console.log("Income:", localStorage.getItem("income"));
+  console.log("Has Siblings:", localStorage.getItem("hasSiblings"));
+  console.log("Siblings Summary:", localStorage.getItem("siblingsSummary"));
+});
