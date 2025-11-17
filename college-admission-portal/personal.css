@@ -1099,6 +1099,11 @@ label.no-underline {
   font-family: 'Roboto', sans-serif;
   color: #656565;
   margin-top: 25px;
+  margin-bottom: 30px;
+}
+
+.income-section.error {
+  margin-bottom: 40px;
 }
 
 .income-label {
@@ -1372,7 +1377,6 @@ select.error,
   border-radius: 5px;
 }
 */
-
 /* Highlight only the radio group, not the label */
 .error-radio-group {
   background-color: #fff0f0;
