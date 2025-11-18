@@ -527,15 +527,6 @@ body {
       text-align: left;
     }
 
-    table th {
-      background-color: #f0f0f0;
-      font-weight: bold;
-      text-align: center;
-    }
-
-    table td {
-      vertical-align: middle;
-    }
 
     /* Specific table styling */
     .info-table td {
@@ -551,27 +542,6 @@ body {
     .info-table .value-cell {
       font-style: normal;
       font-size: 10px;
-      font-weight: normal;
-    }
-
-    /* Grades Table */
-    .grades-table {
-      margin-top: 0;
-    }
-
-    .grades-table th {
-      font-size: 9px;
-      padding: 4px;
-    }
-
-    .grades-table td {
-      text-align: center;
-      font-style: italic;
-    }
-
-    .grades-table td:first-child {
-      text-align: left;
-      font-style: italic;
       font-weight: normal;
     }
 
@@ -717,6 +687,10 @@ body {
     padding: 0;
 }
 
+.value-cell4 {
+    border-style: none;
+}
+
 .cell-inner {
  /*  border: 1px solid #000; border around each value */
   padding: 3px;            /* spacing inside the box */
@@ -746,10 +720,33 @@ body {
     border-collapse: separate; /* collapse borders so td borders show */
 }
 
+.info-table .td .i {
+   border: none;
+}
+
+.two-column-section {
+  display: flex;
+  margin-top: 20px;
+}
+
+.left-box,
+.right-box {
+  flex: 1;
+  padding: 20px;
+  font-size: 12px;
+}
+
+.left-box h3,
+.right-box h3 {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  font-weight: bold;
+}
+
 /*PArental info*/
 .section-title{ 
   margin-bottom: 2px;
-  margin-top: 10px;
+  margin-top: 5px;
 }
 
 .form-section1 {
@@ -783,4 +780,163 @@ body {
     font-style: italic;
     font-weight: bold;
     line-height: 1.1;
+}
+
+/* recom/ program */
+.container3 { display:flex; width:100%; }
+.left-column, .right-column { border:1px solid #000; padding:10px; }
+.section-title2 { border:1px solid #000; padding:3px; font-weight:bold; text-align:center; margin-top:0px; font-size:12px; }
+.subsection-title { font-weight:bold; margin-bottom:3px;  text-decoration: underline; }
+.subsection { margin-bottom:15px;  font-size: 12px; font-weight:bold; font-family: 'Times New Roman', Times, serif;}
+table { width:100%; border-collapse:collapse; }
+th, td { border:1px solid #000; padding:5px; font-weight:bold; font-family: 'Times New Roman', Times, serif; }
+
+
+/* Parental Information Table */
+.parental-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #000;
+  font-size: 10px;
+}
+
+.parental-table td {
+  border: 1px solid #000;
+  padding: 5px 8px;
+  text-align: left;
+}
+
+.parental-table .label-row {
+  font-size: 9px;
+  font-style: italic;
+  font-weight: bold;
+  padding: 2px 8px;
+}
+
+/* Sibling Information Table - No Spacing */
+.sibling-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #000;
+  font-size: 10px;
+  margin-top: 3px;
+}
+
+.sibling-info-table td {
+  border: 1px solid #000;
+  padding: 5px 8px;
+  text-align: left;
+}
+
+.sibling-info-table .label-cell3 {
+  font-size: 9px;
+  font-style: italic;
+  font-weight: normal;
+  padding: 5px 8px;
+  background-color: #f5f5f5;
+}
+
+.sibling-info-table .value-cell3 {
+  padding: 5px 8px;
+  font-size: 10px;
+}
+
+.certification-content {
+  padding: 3px 5px;
+  font-size: 11px;
+}
+
+.cert-text {
+  margin-bottom: 0;
+  line-height: 1.5;
+  text-align: justify;
+}
+
+.cert-text p {
+  margin-bottom: 15px;
+}
+
+.cert-footer {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.cert-left {
+  flex: 1;
+  padding-top: 10px;
+}
+
+.cert-left p {
+  margin: 5px 0;
+  font-size: 11px;
+}
+
+.cert-left .date-signed {
+  margin-top: 15px;
+}
+
+.cert-right {
+  flex: 1;
+}
+
+/* TAO Personnel Box */
+.tao-box {
+  border: 2px solid #000;
+  padding: 5px 5px;
+}
+
+.tao-title {
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+.tao-table {
+  width: 100%;
+  border: none;
+  border-collapse: collapse;
+}
+
+.tao-table tr td {
+  border: none;
+  padding: 3px 0;
+  font-size: 10px;
+}
+
+.tao-label {
+  border: none;
+  padding: 3px 0;
+  font-size: 10px;
+}
+
+.tao-field {
+  border: none;
+  border-bottom: 1px solid #000;
+  padding: 3px 0;
+}
+
+.tao-value {
+  border: none;
+  padding: 3px 5px;
+  font-weight: bold;
+}
+
+.tao-gap {
+  padding-top: 8px;
+}
+
+/* Print-specific styles */
+@media print {
+  .certification-content {
+    page-break-inside: avoid;
+  }
+  
+  .cert-footer {
+    page-break-inside: avoid;
+  }
+  
+  .tao-box {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }

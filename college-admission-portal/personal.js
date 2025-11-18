@@ -509,8 +509,13 @@ function handleNext() {
     sexGroup.classList.remove('error-radio-group');
   }
 
-  const photo = document.getElementById('photoInput');
-  if (!photo.files || !photo.files[0]) { document.querySelector(".photo-error").style.display = "block"; error = true; }
+const photo = document.getElementById('photoInput');
+const savedPhoto = localStorage.getItem("savedPhoto");
+
+if (!savedPhoto && (!photo.files || !photo.files[0])) { 
+  document.querySelector(".photo-error").style.display = "block"; 
+  error = true; 
+}
 
   const nationality = document.getElementById('nationality');
   const otherNationality = document.getElementById('otherNationality');

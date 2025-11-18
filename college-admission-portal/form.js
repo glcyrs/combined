@@ -91,6 +91,109 @@ document.addEventListener("DOMContentLoaded", () => {
       const parentalData = JSON.parse(localStorage.getItem('parentalData') || '{}');
       const siblingData = JSON.parse(localStorage.getItem('siblingData') || '{}');
 
+      // GET CONFIRMATION PAGE DATA
+      const academicStatus = localStorage.getItem('field_academicStatus') || '';
+      const alreadyEnrolled = localStorage.getItem('field_alreadyEnrolled') || '';
+      const firstTimeApplying = localStorage.getItem('field_firstTimeApplying') || '';
+      const transferred = localStorage.getItem('field_transferred') || '';
+      const transferredFrom = localStorage.getItem('field_transferredFrom') || '';
+      const transferredYear = localStorage.getItem('field_transferredYear') || '';
+      const bsuGraduate = localStorage.getItem('field_bsuGraduate') || '';
+      const bsuSchool = localStorage.getItem('field_bsuSchool') || '';
+
+      // GET AAP DATA
+      const aapSelection = localStorage.getItem('field_aap') || '';
+
+      // POPULATE ACADEMIC STATUS CHECKBOXES
+      const academicCheckboxes = document.querySelectorAll('.instructions-right .checkbox-item');
+      if (academicCheckboxes.length >= 2) {
+        // Currently enrolled as Grade 12
+        if (academicStatus === 'graduating') {
+          academicCheckboxes[0].querySelector('div').innerHTML = '☑ <i>Currently enrolled as Grade 12 student</i>';
+          academicCheckboxes[1].querySelector('div').innerHTML = '☐ <i>Senior High School Graduate</i>';
+        } 
+        // Senior High School Graduate
+        else if (academicStatus === 'graduated') {
+          academicCheckboxes[0].querySelector('div').innerHTML = '☐ <i>Currently enrolled as Grade 12 student</i>';
+          academicCheckboxes[1].querySelector('div').innerHTML = '☑ <i>Senior High School Graduate</i>';
+        }
+      }
+
+      // POPULATE TRANSFER STATUS IN EDUCATIONAL INFORMATION
+      const educationalTables = document.querySelectorAll('.form-section table');
+      if (educationalTables.length > 0) {
+        const educationalTable = educationalTables[0]; // First table is educational info
+        const allRows = educationalTable.querySelectorAll('tr');
+        
+        // Find the row with transfer question
+        allRows.forEach(row => {
+          const cell = row.querySelector('td[colspan="2"]');
+          if (cell && cell.innerHTML.includes('Have you ever transferred')) {
+            if (transferred === 'yes') {
+              cell.innerHTML = `
+                <strong>Have you ever transferred during your Senior Your High School?</strong><br>
+                <span style="margin-left:20px;">☑ <i>Yes, previously from ${transferredFrom || '___'} (Year: ${transferredYear || '___'})</i></span>
+                <span style="margin-left:20px;">☐ <i>No</i></span>
+              `;
+            } else if (transferred === 'no') {
+              cell.innerHTML = `
+                <strong>Have you ever transferred during your Senior Your High School?</strong><br>
+                <span style="margin-left:20px;">☐ <i>Yes, previously from</i></span>
+                <span style="margin-left:20px;">☑ <i>No</i></span>
+              `;
+            }
+          }
+        });
+      }
+
+      console.log('Confirmation data loaded:', {
+        academicStatus,
+        alreadyEnrolled,
+        firstTimeApplying,
+        transferred,
+        transferredFrom,
+        transferredYear,
+        bsuGraduate,
+        bsuSchool
+      });
+
+            // POPULATE AAP CHECKBOXES
+      const aapCheckboxes = document.querySelectorAll('.instructions-right .checkbox-item');
+      if (aapCheckboxes.length >= 10 && aapSelection) {
+        // Reset all AAP checkboxes to unchecked first
+        for (let i = 2; i < 10; i++) { // AAP starts at index 2
+          if (aapCheckboxes[i]) {
+            const div = aapCheckboxes[i].querySelector('div');
+            if (div) {
+              const text = div.textContent.trim();
+              div.innerHTML = '☐ ' + div.innerHTML.substring(div.innerHTML.indexOf('<i>'));
+            }
+          }
+        }
+
+        // Map AAP values to checkbox indices
+        const aapMap = {
+          'als': 2,           // Alternative Learning System Graduate
+          'indigent': 3,      // Indigent Applicant
+          'indigenous': 4,    // Indigenous Applicant
+          'pwd': 5,           // Person with Disability (PWD)
+          'iskolar': 6,       // Iskolar ng Bayan
+          'solo-parent': 7,   // Children of Solo Parents
+          'lab-school': 8,    // Integrated School / Laboratory School
+          'none': 9           // None
+        };
+
+        const checkboxIndex = aapMap[aapSelection];
+        if (checkboxIndex !== undefined && aapCheckboxes[checkboxIndex]) {
+          const div = aapCheckboxes[checkboxIndex].querySelector('div');
+          if (div) {
+            div.innerHTML = '☑ ' + div.innerHTML.substring(div.innerHTML.indexOf('<i>'));
+          }
+        }
+      }
+
+      console.log('AAP data loaded:', { aapSelection });
+
       // PERSONAL INFORMATION
       if (document.getElementById('userEmail')) {
         document.getElementById('userEmail').textContent = personalData.email || 'user@gmail.com';
@@ -137,6 +240,15 @@ document.addEventListener("DOMContentLoaded", () => {
       if (document.getElementById('email')) {
         document.getElementById('email').textContent = personalData.email || '';
       }
+      if (document.getElementById('contactAddress')) {
+        document.getElementById('contactAddress').textContent = personalData.contactAddress || '';
+      }
+      if (document.getElementById('contactNumber')) {
+        document.getElementById('contactNumber').textContent = personalData.contactNumber || '';
+      }
+      if (document.getElementById('contactRelationship')) {
+        document.getElementById('contactRelationship').textContent = personalData.contactRelationship || '';
+      }
 
       // EDUCATIONAL INFORMATION
       if (document.getElementById('seniorHighSchool')) {
@@ -148,92 +260,99 @@ document.addEventListener("DOMContentLoaded", () => {
       if (document.getElementById('specialization')) {
         document.getElementById('specialization').textContent = educationData.specialization || 'N/A';
       }
+      if (document.getElementById('jhsYear')) {
+        document.getElementById('jhsYear').textContent = educationData.jhsYear || '';
+      }
+      if (document.getElementById('shsYear')) {
+        document.getElementById('shsYear').textContent = educationData.shsYear || '';
+      }
 
       // GRADES - Update the table cells
-      const gradeTable = document.querySelector('.form-section table tbody');
-      if (gradeTable && gradesData) {
-        const rows = gradeTable.querySelectorAll('tr');
+      if (document.getElementById('englishGrade10')) {
+        document.getElementById('englishGrade10').textContent = gradesData.englishGrade10 || '';
+      }
+      if (document.getElementById('englishGrade11_1st')) {
+        document.getElementById('englishGrade11_1st').textContent = gradesData.englishGrade11_1st || '';
+      }
+      if (document.getElementById('englishGrade11_2nd')) {
+        document.getElementById('englishGrade11_2nd').textContent = gradesData.englishGrade11_2nd || '';
+      }
+      if (document.getElementById('mathGrade10')) {
+        document.getElementById('mathGrade10').textContent = gradesData.mathGrade10 || '';
+      }
+      if (document.getElementById('mathGrade11_1st')) {
+        document.getElementById('mathGrade11_1st').textContent = gradesData.mathGrade11_1st || '';
+      }
+      if (document.getElementById('mathGrade11_2nd')) {
+        document.getElementById('mathGrade11_2nd').textContent = gradesData.mathGrade11_2nd || '';
+      }
+      if (document.getElementById('scienceGrade10')) {
+        document.getElementById('scienceGrade10').textContent = gradesData.scienceGrade10 || '';
+      }
+      if (document.getElementById('scienceGrade11_1st')) {
+        document.getElementById('scienceGrade11_1st').textContent = gradesData.scienceGrade11_1st || '';
+      }
+      if (document.getElementById('scienceGrade11_2nd')) {
+        document.getElementById('scienceGrade11_2nd').textContent = gradesData.scienceGrade11_2nd || '';
+      }
+
+      // PROGRAM CHOICES
+      if (document.getElementById('firstChoice')) {
+        document.getElementById('firstChoice').textContent = programData.firstChoice || '';
+      }
+      if (document.getElementById('firstCampus')) {
+        document.getElementById('firstCampus').textContent = programData.firstCampus || '';
+      }
+      if (document.getElementById('secondChoice')) {
+        document.getElementById('secondChoice').textContent = programData.secondChoice || '';
+      }
+      if (document.getElementById('secondCampus')) {
+        document.getElementById('secondCampus').textContent = programData.secondCampus || '';
+      }
+      if (document.getElementById('thirdChoice')) {
+        document.getElementById('thirdChoice').textContent = programData.thirdChoice || '';
+      }
+      if (document.getElementById('thirdCampus')) {
+        document.getElementById('thirdCampus').textContent = programData.thirdCampus || '';
+      }
+
+      // PARENTAL INFORMATION
+      const parentalTable = document.querySelector('.form-section1 table');
+      if (parentalTable && parentalData) {
+        const rows = parentalTable.querySelectorAll('tr');
         
-        // English row
+        // Mother's info (first data row)
         if (rows[0]) {
           const cells = rows[0].querySelectorAll('td');
-          if (cells[1]) cells[1].textContent = gradesData.englishGrade10 || '';
-          if (cells[2]) cells[2].textContent = gradesData.englishGrade11_1st || '';
-          if (cells[3]) cells[3].textContent = gradesData.englishGrade11_2nd || '';
+          if (cells[0]) cells[0].querySelector('.cell-inner').textContent = parentalData.motherName || '';
+          if (cells[1]) cells[1].querySelector('.cell-inner').textContent = parentalData.motherAge || '';
+          if (cells[2]) cells[2].querySelector('.cell-inner').textContent = parentalData.motherOccupation || '';
+          if (cells[3]) cells[3].querySelector('.cell-inner').textContent = parentalData.motherIncome || '';
+          if (cells[4]) cells[4].querySelector('.cell-inner').textContent = parentalData.motherContact || '';
         }
         
-        // Mathematics row
-        if (rows[1]) {
-          const cells = rows[1].querySelectorAll('td');
-          if (cells[1]) cells[1].textContent = gradesData.mathGrade10 || '';
-          if (cells[2]) cells[2].textContent = gradesData.mathGrade11_1st || '';
-          if (cells[3]) cells[3].textContent = gradesData.mathGrade11_2nd || '';
-        }
-        
-        // Science row
+        // Father's info (third data row, skipping labels)
         if (rows[2]) {
           const cells = rows[2].querySelectorAll('td');
-          if (cells[1]) cells[1].textContent = gradesData.scienceGrade10 || '';
-          if (cells[2]) cells[2].textContent = gradesData.scienceGrade11_1st || '';
-          if (cells[3]) cells[3].textContent = gradesData.scienceGrade11_2nd || '';
+          if (cells[0]) cells[0].querySelector('.cell-inner').textContent = parentalData.fatherName || '';
+          if (cells[1]) cells[1].querySelector('.cell-inner').textContent = parentalData.fatherAge || '';
+          if (cells[2]) cells[2].querySelector('.cell-inner').textContent = parentalData.fatherOccupation || '';
+          if (cells[3]) cells[3].querySelector('.cell-inner').textContent = parentalData.fatherIncome || '';
+          if (cells[4]) cells[4].querySelector('.cell-inner').textContent = parentalData.fatherContact || '';
         }
       }
 
-      // PROGRAM CHOICES - Update the table
-      const programTable = document.querySelectorAll('.form-section table')[1];
-      if (programTable && programData) {
-        const tbody = programTable.querySelector('tbody');
-        if (tbody) {
-          const rows = tbody.querySelectorAll('tr');
-          
-          // 1st Choice
-          if (rows[0]) {
-            const cells = rows[0].querySelectorAll('td');
-            if (cells[1]) cells[1].textContent = programData.firstChoice || '';
-            if (cells[2]) cells[2].textContent = programData.firstCampus || '';
-          }
-          
-          // 2nd Choice
-          if (rows[1]) {
-            const cells = rows[1].querySelectorAll('td');
-            if (cells[1]) cells[1].textContent = programData.secondChoice || '';
-            if (cells[2]) cells[2].textContent = programData.secondCampus || '';
-          }
-          
-          // 3rd Choice
-          if (rows[2]) {
-            const cells = rows[2].querySelectorAll('td');
-            if (cells[1]) cells[1].textContent = programData.thirdChoice || '';
-            if (cells[2]) cells[2].textContent = programData.thirdCampus || '';
-          }
-        }
-      }
-
-      // PARENTAL INFORMATION - Update the table
-      const parentalTable = document.querySelectorAll('.form-section table')[2];
-      if (parentalTable && parentalData) {
-        const tbody = parentalTable.querySelector('tbody');
-        if (tbody) {
-          const rows = tbody.querySelectorAll('tr');
-          
-          // Mother's info
-          if (rows[0]) {
-            const cells = rows[0].querySelectorAll('td');
-            if (cells[0]) cells[0].textContent = parentalData.motherName || '';
-            if (cells[1]) cells[1].textContent = parentalData.motherAge || '';
-            if (cells[2]) cells[2].textContent = parentalData.motherOccupation || '';
-            if (cells[3]) cells[3].textContent = parentalData.motherContact || '';
-          }
-          
-          // Father's info
-          if (rows[2]) {
-            const cells = rows[2].querySelectorAll('td');
-            if (cells[0]) cells[0].textContent = parentalData.fatherName || '';
-            if (cells[1]) cells[1].textContent = parentalData.fatherAge || '';
-            if (cells[2]) cells[2].textContent = parentalData.fatherOccupation || '';
-            if (cells[3]) cells[3].textContent = parentalData.fatherContact || '';
-          }
-        }
+      // LOAD SAVED PHOTO AT THE END
+      const savedPhoto = localStorage.getItem("savedPhoto");
+      const photoBox = document.getElementById("photoPreview");
+      
+      if (savedPhoto && photoBox) {
+        photoBox.style.backgroundImage = `url('${savedPhoto}')`;
+        photoBox.style.backgroundSize = "cover";
+        photoBox.style.backgroundPosition = "center";
+        photoBox.style.backgroundRepeat = "no-repeat";
+        photoBox.textContent = ""; // Remove "2x2 Photo" text
+        console.log('✅ Photo loaded in form preview');
       }
 
       console.log('Form populated successfully from localStorage');
