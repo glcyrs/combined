@@ -1,13 +1,13 @@
 const downloads = [
-  'assets/grades_form_1.pdf', // for the first card
-  'assets/grades_form_2.pdf'  // for the second card
+  'assets/grades_form_1.pdf',
+  'assets/grades_form_2.pdf'
 ];
 
 document.querySelectorAll('.grade-card').forEach((card, index) => {
   card.addEventListener('click', () => {
     const link = document.createElement('a');
     link.href = downloads[index];
-    link.download = downloads[index].split('/').pop(); // set filename
+    link.download = downloads[index].split('/').pop();
     link.click();
   });
 });
@@ -23,27 +23,20 @@ const pageToStep = {
   "programs.html": 6,
   "form.html": 7,
   "submit.html": 8,
-  // add more pages if needed
 };
 
-// ====== Get current page ======
 const currentPage = window.location.pathname.split("/").pop();
-
-// ====== Load progress safely ======
 let savedStep = parseInt(localStorage.getItem("currentStep"));
 let currentStep = pageToStep[currentPage] !== undefined ? pageToStep[currentPage] : (savedStep || 5);
-let maxUnlockedStep = parseInt(localStorage.getItem("maxUnlockedStep")) || currentStep;
+let storedMax = parseInt(localStorage.getItem("maxUnlockedStep"));
+let maxUnlockedStep = (storedMax !== null && !isNaN(storedMax)) ? storedMax : currentStep;
 
 document.addEventListener("DOMContentLoaded", () => {
   const steps = document.querySelectorAll(".step");
 
-  // ====== Update step UI ======
   function updateSteps() {
     steps.forEach((step, index) => {
-      // ACTIVE step (green)
       step.classList.toggle("active", index === currentStep);
-
-      // CLICKABLE or LOCKED
       if (index <= maxUnlockedStep) {
         step.classList.add("clickable");
         step.style.pointerEvents = "auto";
@@ -54,45 +47,38 @@ document.addEventListener("DOMContentLoaded", () => {
         step.style.opacity = "1";
       }
     });
-
-    // Save progress
     localStorage.setItem("currentStep", currentStep);
     localStorage.setItem("maxUnlockedStep", maxUnlockedStep);
   }
 
-  // ====== Step click navigation ======
   steps.forEach((step, index) => {
     step.addEventListener("click", () => {
-      if (index > maxUnlockedStep) return; // block locked steps
-
+      if (index > maxUnlockedStep) return;
       currentStep = index;
+      if (currentStep === maxUnlockedStep && maxUnlockedStep < steps.length - 1) {
+        maxUnlockedStep++;
+      }
       updateSteps();
-
-      // Optional: show section if you have this function
       if (typeof showSection === "function") showSection(currentStep);
-
-      // Navigate pages based on step
       switch (index) {
-      case 0: window.location.href = "index.html"; break;
-      case 1: window.location.href = "readfirst.html"; break;
-      case 2: window.location.href = "confirmation.html"; break;
-      case 3: window.location.href = "aap.html"; break;
-      case 4: window.location.href = "personal.html"; break;
-      case 5: window.location.href = "educattach.html"; break;
-      case 6: window.location.href = "programs.html"; break;
-      case 7: window.location.href = "form.html"; break;
-      case 8: window.location.href = "submit.html"; break;
-        // Add more steps/pages here
+        case 0: window.location.href = "index.html"; break;
+        case 1: window.location.href = "readfirst.html"; break;
+        case 2: window.location.href = "confirmation.html"; break;
+        case 3: window.location.href = "aap.html"; break;
+        case 4: window.location.href = "personal.html"; break;
+        case 5: window.location.href = "educattach.html"; break;
+        case 6: window.location.href = "programs.html"; break;
+        case 7: window.location.href = "form.html"; break;
+        case 8: window.location.href = "submit.html"; break;
       }
     });
   });
 
-  // ====== Initial render ======
   updateSteps();
 });
 
 // =====================================================
-// FILE STORAGE (store file + type)
+// FILE STORAGE
 // =====================================================
 let uploadedFiles = {
   1: null,
@@ -104,8 +90,6 @@ let uploadedFiles = {
 
 // =====================================================
 // HANDLE FILE UPLOAD
-// - label param optional. If not passed, reads data-type from the input element.
-// - removes red error highlights for that upload box when file is selected
 // =====================================================
 function handleFileUpload(num, label) {
   const input = document.getElementById(`file${num}`);
@@ -116,7 +100,6 @@ function handleFileUpload(num, label) {
     const type = label || (input && input.dataset && input.dataset.type) || "Required";
     uploadedFiles[num] = { file, type };
 
-    // update status text
     if (status) {
       status.innerHTML = `
         <i class="fa-solid fa-circle-check" style="color:#28a745;"></i>
@@ -124,15 +107,18 @@ function handleFileUpload(num, label) {
       `;
     }
 
-    // Remove red highlight from upload box (if any)
     const uploadBox = input ? input.closest(".upload-controls") : null;
     if (uploadBox) uploadBox.classList.remove("input-error");
 
-    // Also remove 'input-error' from any required text input inside the same upload-controls area
     if (uploadBox) {
       const requiredInside = uploadBox.querySelectorAll(".form-input.input-error");
       requiredInside.forEach(el => el.classList.remove("input-error"));
     }
+
+    localStorage.setItem(`file-${num}-data`, JSON.stringify({
+      file: { name: file.name, size: file.size },
+      type
+    }));
 
     updateFileList();
   }
@@ -182,7 +168,6 @@ function updateFileList() {
   }
 }
 
-// small helper to avoid HTML injection in file names/types
 function escapeHtml(str) {
   if (str === null || str === undefined) return "";
   return String(str)
@@ -195,14 +180,11 @@ function escapeHtml(str) {
 
 // =====================================================
 // NOTIFICATION/ALERT SYSTEM
-// - showNotification(message, status, autoHideMs)
-// - status: "error"|"success"|undefined
 // =====================================================
 function showNotification(message) {
   let noti = document.getElementById("notification");
   let notiText;
 
-  // If notification container does not exist, create one
   if (!noti) {
     noti = document.createElement("div");
     noti.id = "notification";
@@ -218,35 +200,26 @@ function showNotification(message) {
     noti.style.boxShadow = "0 6px 18px rgba(0,0,0,0.1)";
     noti.style.fontSize = "15px";
     noti.style.fontWeight = "500";
-
-    // RED ALERT STYLE
     noti.style.background = "#ffe3e3";
     noti.style.color = "#c20000";
 
     notiText = document.createElement("div");
     notiText.id = "notification-text";
 
-    noti.appendChild(notiText); // NO CLOSE BUTTON ANYMORE
+    noti.appendChild(notiText);
     document.body.appendChild(noti);
   } else {
     notiText = document.getElementById("notification-text");
   }
 
-  // Set message
   notiText.innerText = message;
-
-  // Ensure red styling even if the element is reused
   noti.style.background = "#ffe3e3";
   noti.style.border = "1px solid #ff9b9b";
   noti.style.color = "#c20000";
-
-  // Show it
   noti.style.display = "flex";
 
-  //SCROLL TO TOP
   window.scrollTo({ top: 0, behavior: "smooth" });
 
-  // Auto-hide after 4 seconds
   if (noti._hideTimeout) clearTimeout(noti._hideTimeout);
 
   noti._hideTimeout = setTimeout(() => {
@@ -255,8 +228,7 @@ function showNotification(message) {
 }
 
 // =====================================================
-// REMOVE FILE (with confirm box fallback)
-// - When removing, add red error highlight back to upload box
+// REMOVE FILE
 // =====================================================
 window.removeFile = function (fileNumber) {
   const confirmBox = document.getElementById("confirmBox");
@@ -270,12 +242,12 @@ window.removeFile = function (fileNumber) {
     const status = document.getElementById(`status${fileNumber}`);
     if (status) status.textContent = "No file chosen";
 
-    // add input-error class back to upload box to indicate missing
     if (input) {
       const uploadBox = input.closest(".upload-controls");
       if (uploadBox) uploadBox.classList.add("input-error");
     }
 
+    localStorage.removeItem(`file-${fileNumber}-data`);
     updateFileList();
     showNotification("File removed. Please upload a file for this slot.", "error");
   };
@@ -288,14 +260,12 @@ window.removeFile = function (fileNumber) {
     };
     confirmNo.onclick = () => confirmBox.style.display = "none";
   } else {
-    // no confirm modal available -> remove immediately
     doRemove();
   }
 };
 
 // =====================================================
 // FORM VALIDATION & NEXT BUTTON
-// - Single consolidated next-button handler
 // =====================================================
 (function setupNextButton() {
   const nextBtn = document.querySelector(".next-btn");
@@ -307,10 +277,8 @@ window.removeFile = function (fileNumber) {
     const requiredInputs = document.querySelectorAll(".form-input[required]");
     let isValid = true;
 
-    // Remove previous error highlights
     document.querySelectorAll(".input-error").forEach(el => el.classList.remove("input-error"));
 
-    // Check required inputs
     requiredInputs.forEach(input => {
       if (!input.value || !input.value.trim()) {
         input.classList.add("input-error");
@@ -318,7 +286,6 @@ window.removeFile = function (fileNumber) {
       }
     });
 
-    // Check file uploads (use uploadedFiles to reflect actual uploads)
     Object.keys(uploadedFiles).forEach(key => {
       if (!uploadedFiles[key]) {
         const fileInput = document.getElementById(`file${key}`);
@@ -336,7 +303,6 @@ window.removeFile = function (fileNumber) {
       }
     });
 
-    // Check grade table inputs (Junior High School)
     const gradeInputsJHS = document.querySelectorAll('.grades-table input[type="number"]');
     let hasEmptyGrades = false;
     gradeInputsJHS.forEach(input => {
@@ -347,24 +313,21 @@ window.removeFile = function (fileNumber) {
       }
     });
     
-    // Highlight content1 container if JHS grades are empty
     if (hasEmptyGrades) {
       const content1Box = document.querySelector('.content1');
       if (content1Box) content1Box.classList.add("input-error");
     }
 
-    // Check Senior High School grade inputs and selects
     const gradeInputsSHS = document.querySelectorAll('.grades-table2 input[type="number"]');
     const gradeSelects = document.querySelectorAll('.grades-table2 select');
     let hasEmptySHSGrades = false;
 
     gradeInputsSHS.forEach(input => {
-      // Skip validation if the corresponding N/A checkbox is checked
       const row = input.closest('tr');
       const naCheckbox = row ? row.querySelector('input[type="checkbox"]') : null;
       
       if (naCheckbox && naCheckbox.checked) {
-        return; // Skip this input if N/A is checked
+        return;
       }
       
       if (!input.value || input.value.trim() === "" || input.value === "0") {
@@ -375,28 +338,17 @@ window.removeFile = function (fileNumber) {
     });
 
     gradeSelects.forEach(select => {
-      // Only validate selects that are visible/relevant
       const row = select.closest('tr');
       const naCheckbox = row ? row.querySelector('input[type="checkbox"]') : null;
       
       if (naCheckbox && naCheckbox.checked) {
-        return; // Skip this select if N/A is checked
-      }
-      
-      // Only flag as error if a select is used but empty
-      if (select.value && select.value.trim() !== "") {
-        // Select has a value, no error
-      } else {
-        // Check if alternative subject was needed but not selected
-        // You can add more specific logic here if needed
+        return;
       }
     });
 
-    // Highlight content2 container if SHS grades are empty
     if (hasEmptySHSGrades) {
       const content2Boxes = document.querySelectorAll('.content2');
       content2Boxes.forEach(box => {
-        // Only highlight the one with grades-table2
         if (box.querySelector('.grades-table2')) {
           box.classList.add("input-error");
         }
@@ -404,7 +356,6 @@ window.removeFile = function (fileNumber) {
     }
 
     if (!isValid) {
-      // highlight missing statuses visually
       Object.keys(uploadedFiles).forEach(key => {
         if (!uploadedFiles[key]) {
           const st = document.getElementById(`status${key}`);
@@ -420,23 +371,52 @@ window.removeFile = function (fileNumber) {
       return;
     }
 
-    // Proceed action (uncomment or change to your navigation)
+    // ============================================
+    // 🔥 SAVE EDUCATION & GRADES DATA BEFORE NAVIGATION
+    // ============================================
+
+    const seniorHighSchoolField = document.querySelector('input[name="senior_high_school"]');
+    const trackField = document.querySelector('select[name="track"]');
+    const specializationField = document.querySelector('input[name="specialization"]');
+
+    const educationData = {
+      seniorHighSchool: seniorHighSchoolField?.value.toUpperCase() || '',
+      track: trackField?.value || '',
+      specialization: specializationField?.value || 'N/A'
+    };
+
+    const gradesData = {
+      englishGrade10: document.querySelector('input[name="english_g10"]')?.value || '',
+      mathGrade10: document.querySelector('input[name="math_g10"]')?.value || '',
+      scienceGrade10: document.querySelector('input[name="science_g10"]')?.value || '',
+      englishGrade11_1st: document.querySelector('input[name="english_g11_1"]')?.value || '',
+      mathGrade11_1st: document.querySelector('input[name="math_g11_1"]')?.value || '',
+      scienceGrade11_1st: document.querySelector('input[name="science_g11_1"]')?.value || '',
+      englishGrade11_2nd: document.querySelector('input[name="english_g11_2"]')?.value || '',
+      mathGrade11_2nd: document.querySelector('input[name="math_g11_2"]')?.value || '',
+      scienceGrade11_2nd: document.querySelector('input[name="science_g11_2"]')?.value || ''
+    };
+
+    localStorage.setItem('educationData', JSON.stringify(educationData));
+    localStorage.setItem('gradesData', JSON.stringify(gradesData));
+
+    console.log('✅ Education data saved:', educationData);
+    console.log('✅ Grades data saved:', gradesData);
+
     window.location.href = "programs.html";
   });
 })();
 
 // =====================================================
-// RESTORE & SAVE ALL PROGRESS (JHS, SHS, Uploaded Files)
+// RESTORE & SAVE ALL PROGRESS
 // =====================================================
 document.addEventListener("DOMContentLoaded", () => {
 
-  // ---------- Helper to remove highlights if all filled ----------
   function checkContainerHighlight(container, inputs) {
     const empty = Array.from(inputs).some(input => !input.value || input.value.trim() === "" || input.value === "0");
     if (!empty && container) container.classList.remove("input-error");
   }
 
-  // ------------------- JHS GRADES -------------------
   const jhsInputs = document.querySelectorAll('.grades-table input[type="number"]');
   const content1Box = document.querySelector('.content1');
 
@@ -444,12 +424,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const saved = localStorage.getItem(`jhs-${input.name}`);
     if (saved) input.value = saved;
 
-    // Remove highlight if filled
     if (input.value && input.value.trim() !== "" && input.value !== "0") {
       input.classList.remove("input-error");
     }
 
-    // Save & remove highlights on input
     input.addEventListener("input", () => {
       localStorage.setItem(`jhs-${input.name}`, input.value);
       input.classList.remove("input-error");
@@ -457,7 +435,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // ------------------- SHS GRADES -------------------
   const shsInputs = document.querySelectorAll('.grades-table2 input[type="number"]');
   const shsSelects = document.querySelectorAll('.grades-table2 select');
 
@@ -469,7 +446,6 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem(`shs-${input.name}`, input.value);
       input.classList.remove("input-error");
 
-      // Remove content2 highlight if all filled/N/A checked
       const content2Box = input.closest('.content2');
       const rows = content2Box.querySelectorAll('tr');
       let empty = false;
@@ -493,162 +469,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // ------------------- UPLOADED FILES -------------------
-  Object.keys(uploadedFiles).forEach(key => {
-    const saved = localStorage.getItem(`file-${key}`);
-    if (saved) {
-      const fileInput = document.getElementById(`file${key}`);
-      if (fileInput) {
-        // Cannot restore actual File object, but we can restore status text
-        const status = document.getElementById(`status${key}`);
-        if (status) status.innerHTML = `
-          <i class="fa-solid fa-circle-check" style="color:#28a745;"></i>
-          ${saved}
-        `;
-        // Mark uploadedFiles for reference
-        uploadedFiles[key] = { file: { name: saved }, type: fileInput.dataset.type || "Required" };
-        const uploadBox = fileInput.closest(".upload-controls");
-        if (uploadBox) uploadBox.classList.remove("input-error");
-      }
-    }
-  });
-
-});
-
-// =====================================================
-// SAVE FILE UPLOADS TO LOCALSTORAGE
-// =====================================================
-function handleFileUpload(num, label) {
-  const input = document.getElementById(`file${num}`);
-  const status = document.getElementById(`status${num}`);
-  const file = input && input.files ? input.files[0] : null;
-
-  if (file) {
-    const type = label || (input && input.dataset && input.dataset.type) || "Required";
-    uploadedFiles[num] = { file, type };
-
-    if (status) {
-      status.innerHTML = `
-        <i class="fa-solid fa-circle-check" style="color:#28a745;"></i>
-        ${escapeHtml(file.name)}
-      `;
-    }
-
-    const uploadBox = input ? input.closest(".upload-controls") : null;
-    if (uploadBox) uploadBox.classList.remove("input-error");
-
-    // Save file name to localStorage for persistence
-    localStorage.setItem(`file-${num}`, file.name);
-
-    updateFileList();
-  }
-}
-
-// =====================================================
-// REMOVE FILE & LOCALSTORAGE ENTRY
-// =====================================================
-window.removeFile = function (fileNumber) {
-  uploadedFiles[fileNumber] = null;
-  const input = document.getElementById(`file${fileNumber}`);
-  if (input) input.value = "";
-  const status = document.getElementById(`status${fileNumber}`);
-  if (status) status.textContent = "No file chosen";
-
-  const uploadBox = input.closest(".upload-controls");
-  if (uploadBox) uploadBox.classList.add("input-error");
-
-  // Remove from localStorage
-  localStorage.removeItem(`file-${fileNumber}`);
-
-  updateFileList();
-  showNotification("File removed. Please upload a file for this slot.", "error");
-};
-
-// =====================================================
-// SAVE & RESTORE FORM PROGRESS (Education Fields + Uploaded Files)
-// =====================================================
-document.addEventListener("DOMContentLoaded", () => {
-  // ---------- EDUCATIONAL INFORMATION ----------
-  const eduFields = document.querySelectorAll('.container2 input, .container2 select, .container2 textarea');
-  eduFields.forEach(field => {
-    const saved = localStorage.getItem(`edu-${field.name}`);
-    if (saved !== null) {
-      if (field.type === "checkbox" || field.type === "radio") {
-        field.checked = saved === "true";
-      } else {
-        field.value = saved;
-      }
-      field.classList.remove("input-error");
-    }
-
-   // SAVE
-document.querySelectorAll('.container2 input, .container2 select, .container2 textarea').forEach(field => {
-    field.addEventListener('change', () => {
-        localStorage.setItem(`edu-${field.name}`, field.type === "checkbox" ? field.checked : field.value);
-    });
-});
-
-// RESTORE
-document.querySelectorAll('.container2 input, .container2 select, .container2 textarea').forEach(field => {
-    const saved = localStorage.getItem(`edu-${field.name}`);
-    if (saved !== null) {
-        if (field.type === "radio") field.checked = (field.value === saved);
-        else if (field.type === "checkbox") field.checked = (saved === "true");
-        else field.value = saved;
-    }
-});
-
-    // Also listen to change events for selects/radio
-    field.addEventListener("change", () => {
-      if (field.type === "checkbox" || field.type === "radio") {
-        localStorage.setItem(`edu-${field.name}`, field.checked);
-      } else {
-        localStorage.setItem(`edu-${field.name}`, field.value);
-      }
-      field.classList.remove("input-error");
-    });
-  });
-
-  // ---------- JHS GRADES ----------
-  const jhsInputs = document.querySelectorAll('.grades-table input[type="number"]');
-  const content1Box = document.querySelector('.content1');
-  jhsInputs.forEach(input => {
-    const saved = localStorage.getItem(`jhs-${input.name}`);
-    if (saved) input.value = saved;
-    if (input.value) input.classList.remove("input-error");
-
-    input.addEventListener("input", () => {
-      localStorage.setItem(`jhs-${input.name}`, input.value);
-      input.classList.remove("input-error");
-
-      const empty = Array.from(jhsInputs).some(i => !i.value || i.value.trim() === "" || i.value === "0");
-      if (!empty && content1Box) content1Box.classList.remove("input-error");
-    });
-  });
-
-  // ---------- SHS GRADES ----------
-  const shsInputs = document.querySelectorAll('.grades-table2 input[type="number"]');
-  const shsSelects = document.querySelectorAll('.grades-table2 select');
-
-  shsInputs.forEach(input => {
-    const saved = localStorage.getItem(`shs-${input.name}`);
-    if (saved) input.value = saved;
-    input.addEventListener("input", () => {
-      localStorage.setItem(`shs-${input.name}`, input.value);
-      input.classList.remove("input-error");
-    });
-  });
-
-  shsSelects.forEach(select => {
-    const saved = localStorage.getItem(`shs-${select.name}`);
-    if (saved) select.value = saved;
-
-    select.addEventListener("change", () => {
-      localStorage.setItem(`shs-${select.name}`, select.value);
-    });
-  });
-
-  // ---------- UPLOADED FILES ----------
   Object.keys(uploadedFiles).forEach(key => {
     const saved = localStorage.getItem(`file-${key}-data`);
     if (saved) {
@@ -672,110 +492,28 @@ document.querySelectorAll('.container2 input, .container2 select, .container2 te
   });
 
   updateFileList();
+
+  const eduFields = document.querySelectorAll('.container2 input, .container2 select, .container2 textarea');
+  eduFields.forEach(field => {
+    const saved = localStorage.getItem(`edu-${field.name}`);
+    if (saved !== null) {
+      if (field.type === "checkbox" || field.type === "radio") {
+        field.checked = saved === "true";
+      } else {
+        field.value = saved;
+      }
+      field.classList.remove("input-error");
+    }
+
+    field.addEventListener("change", () => {
+      if (field.type === "checkbox" || field.type === "radio") {
+        localStorage.setItem(`edu-${field.name}`, field.checked);
+      } else {
+        localStorage.setItem(`edu-${field.name}`, field.value);
+      }
+      field.classList.remove("input-error");
+    });
+  });
 });
 
-// ---------- HANDLE FILE UPLOAD ----------
-function handleFileUpload(num, label) {
-  const input = document.getElementById(`file${num}`);
-  const status = document.getElementById(`status${num}`);
-  const file = input && input.files ? input.files[0] : null;
-
-  if (file) {
-    const type = label || (input.dataset && input.dataset.type) || "Required";
-    uploadedFiles[num] = { file, type };
-
-    if (status) {
-      status.innerHTML = `
-        <i class="fa-solid fa-circle-check" style="color:#28a745;"></i>
-        ${escapeHtml(file.name)}
-      `;
-    }
-
-    const uploadBox = input ? input.closest(".upload-controls") : null;
-    if (uploadBox) uploadBox.classList.remove("input-error");
-
-    localStorage.setItem(`file-${num}-data`, JSON.stringify({
-      file: { name: file.name, size: file.size },
-      type
-    }));
-
-    updateFileList();
-  }
-}
-
-// ---------- REMOVE FILE ----------
-window.removeFile = function (fileNumber) {
-  uploadedFiles[fileNumber] = null;
-  const input = document.getElementById(`file${fileNumber}`);
-  if (input) input.value = "";
-  const status = document.getElementById(`status${fileNumber}`);
-  if (status) status.textContent = "No file chosen";
-
-  const uploadBox = input.closest(".upload-controls");
-  if (uploadBox) uploadBox.classList.add("input-error");
-
-  localStorage.removeItem(`file-${fileNumber}-data`);
-  updateFileList();
-  showNotification("File removed. Please upload a file for this slot.", "error");
-};
-
-  // Update the file list table after restoring
-  updateFileList();
-
-// =====================================================
-// HANDLE FILE UPLOAD AND SAVE FULL DATA
-// =====================================================
-function handleFileUpload(num, label) {
-  const input = document.getElementById(`file${num}`);
-  const status = document.getElementById(`status${num}`);
-  const file = input && input.files ? input.files[0] : null;
-
-  if (file) {
-    const type = label || (input.dataset && input.dataset.type) || "Required";
-    uploadedFiles[num] = { file, type };
-
-    if (status) {
-      status.innerHTML = `
-        <i class="fa-solid fa-circle-check" style="color:#28a745;"></i>
-        ${escapeHtml(file.name)}
-      `;
-    }
-
-    const uploadBox = input ? input.closest(".upload-controls") : null;
-    if (uploadBox) uploadBox.classList.remove("input-error");
-
-    // Save full uploaded file data in localStorage
-    localStorage.setItem(`file-${num}-data`, JSON.stringify({
-      file: { name: file.name, size: file.size },
-      type
-    }));
-
-    updateFileList();
-  }
-}
-
-// =====================================================
-// REMOVE FILE & LOCALSTORAGE ENTRY
-// =====================================================
-window.removeFile = function (fileNumber) {
-  uploadedFiles[fileNumber] = null;
-  const input = document.getElementById(`file${fileNumber}`);
-  if (input) input.value = "";
-  const status = document.getElementById(`status${fileNumber}`);
-  if (status) status.textContent = "No file chosen";
-
-  const uploadBox = input.closest(".upload-controls");
-  if (uploadBox) uploadBox.classList.add("input-error");
-
-  // Remove from localStorage
-  localStorage.removeItem(`file-${fileNumber}-data`);
-
-  updateFileList();
-  showNotification("File removed. Please upload a file for this slot.", "error");
-};
-
-
-// =====================================================
-// Initialize: optionally call updateFileList to show initial state
-// =====================================================
 updateFileList();

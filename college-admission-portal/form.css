@@ -1,3 +1,53 @@
+/* ---------- PRINT STYLES ---------- */
+@media print {
+
+  @page {
+    size: letter;
+    margin: 0.75in 0.75in;
+  }
+
+  body {
+    background: white !important;
+    margin: 10px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    font-size: 11px;
+  }
+
+  /* Hide non-print elements */
+  .header-section,
+  .info-box,
+  .steps-section,
+  .step,
+  .submit-section,
+  .btn-next,
+  .ay-section {
+    display: none !important;
+  }
+
+  .frame,
+  .frame2 {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Prevent breaking important blocks */
+  .privacy-section,
+  .instructions-section,
+  .form-section,
+  .form-section3,
+  table {
+    page-break-inside: avoid;
+  }
+}
+
+/* GENERAL */
 body {
   margin: 0;
   font-family: 'Arial', sans-serif;
@@ -229,203 +279,508 @@ body {
 
 /* ACTIVE STEP */
 .step.active span {
-  background-color: #28a745; /* green */
+  background-color: #28a745; /* green circle */
   border-color: #1a9737;
   color: #fff;
+}
+
+.step.active i {
+  color: white;
+}
+
+.step p {
+  margin-top: 5px;
+  color: #777;
 }
 
 .step.active p {
   color: #28a745;
 }
 
+
 /* body */
 .container {
-    width: calc(100% - 60px);       
+    width: 92%;       
     margin: 0 auto;             /* center horizontally */
     background-color: white;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 4px solid #EEEEEE; 
     padding: 20px;          /* optional internal padding */
     box-sizing: border-box; /* include padding in width/height */
 }
 
-.section-header {
-    background-color: #28a745;
-    color: white;
-    padding: 12px 20px;
+/* When the screen gets small enough for overlap risk */
+@media (max-width: 900px) {
+  .container {
+    margin-top: 200px; /* add extra space only when needed */
+  }
+}
+
+    .section-header {
+      background-color: #28a745;
+      color: white;
+      padding: 12px 20px;
+      font-weight: bold;
+      font-size: 16px;
+      font-family: Arial, sans-serif;
+    }
+
+    .frame {
+      background-color: rgba(163, 163, 163, 0.204);
+      padding: 25px;
+      margin-top: 30px;
+    }
+
+    .notice-box {
+      background-color: #fffd8741;
+      border: 2px solid #cecd6c67;
+      border-radius: 3px;
+      padding: 13px;
+      font-size: 13px;
+      font-family: Arial, sans-serif;
+    }
+
+    .container0 {
+      margin: 30px;
+    }
+
+    .frame2 {
+      background-color: rgb(255, 255, 255);
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .form-content {
+      border: 2px solid #000; 
+      padding: 5px;
+    }
+
+    /* Header Section */
+    .reference-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 10px 20px 5px 20px;
+    }
+
+    .header-section1 {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 10px 20px;
+      gap: 15px;
+    }
+
+    .logo-section {
+      width: 100px;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      width: 100%;
+      height: auto;
+    }
+
+    .title-section {
+      flex-grow: 1;
+      text-align: center;
+      padding: 0 10px;
+    }
+
+    .university-name {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+
+    .university-subtitle {
+      font-size: 16px;
+      color: #c00;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+
+    .office-name {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .form-title {
+      font-size: 18px;
+      font-weight: bold;
+      line-height: 1.2;
+    }
+
+    .app-number {
+      font-size: 12px;
+      text-align: right;
+      width: 130px;
+      flex-shrink: 0;
+    }
+
+    /* Privacy Section */
+    .privacy-section {
+      border: 2px solid #000;
+      padding: 15px 20px;
+      display: flex;
+      gap: 15px;
+      align-items: flex-start;
+      box-sizing: border-box;
+       margin-bottom: 0;
+     /* background: #f5f5f5;  temp to visualize */
+    }
+
+    .privacy-text {
+      flex: 1;
+      font-size: 12px;
+      line-height: 1.3;
+      font-style: italic;
+      text-align: justify;
+    }
+
+    .privacy-text p {
+      margin-bottom: 6px;
+    }
+
+    .photo-box {
+      width: 150px;
+      height: 200px;
+      border: 2px solid #000;
+      flex-shrink: 0;
+      background-color: #f9f9f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: #999;
+      font-style: normal;
+    }
+
+    .photo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+.instructions-section {
+    display: flex;
+    justify-content: space-between;
+    gap: 0;
+    border-bottom: 2px solid #000;
+    padding: 0;
+}
+
+/* LEFT SIDE */
+.instructions-left {
+    flex: 1;
+    border: 1.5px solid #000;
+    padding: 10px 20px;
+    font-size: 12px;
+}
+
+/* RIGHT SIDE — fixed width and on the right */
+.instructions-right {
+    width: 300px;         /* adjust width to match your photo */
+    border: 1.5px solid #000;
+    padding: 10px 20px;
+}
+
+/* Titles and checkboxes */
+.instructions-right .title {
     font-weight: bold;
-    font-size: 16px;
+    margin-bottom: 5px;
 }
 
-.frame {
-  background-color: rgba(163, 163, 163, 0.204);
-  padding: 25px 25px;           /* gives space inside the frame (top + sides) */
-  margin-top: 30px;             /* adds space above the entire frame */
-  box-sizing: border-box;
+.checkbox-item {
+    margin-bottom: 3px;
+    font-size: 11px;
+}
+    /* Form Sections */
+    .form-section {
+     /* border-bottom: 2px solid #000;*/
+      margin-top: 0;
+    }
+
+    .section-title {
+    /*  background-color: #000;*/
+      color: rgb(0, 0, 0);
+      padding: 5px 10px;
+      border: 1.5px solid #000;
+      font-weight: bold;
+      font-size: 11px;
+      font-style: normal;
+      box-sizing: border-box;
+    }
+
+    /* Table Styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+    }
+
+    table th,
+    table td {
+      border: 1px solid #000;
+      padding: 5px 8px;
+      text-align: left;
+    }
+
+    table th {
+      background-color: #f0f0f0;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    table td {
+      vertical-align: middle;
+    }
+
+    /* Specific table styling */
+    .info-table td {
+      font-style: italic;
+    }
+
+    .info-table .label-cell {
+      font-style: italic;
+      font-size: 9px;
+      color: #666;
+    }
+
+    .info-table .value-cell {
+      font-style: normal;
+      font-size: 10px;
+      font-weight: normal;
+    }
+
+    /* Grades Table */
+    .grades-table {
+      margin-top: 0;
+    }
+
+    .grades-table th {
+      font-size: 9px;
+      padding: 4px;
+    }
+
+    .grades-table td {
+      text-align: center;
+      font-style: italic;
+    }
+
+    .grades-table td:first-child {
+      text-align: left;
+      font-style: italic;
+      font-weight: normal;
+    }
+
+    /* Recommendation Section */
+    .recommendation-section {
+      display: flex;
+      border-top: 1px solid #000;
+    }
+
+    .recommendation-left {
+      width: 50%;
+      border-right: 1px solid #000;
+      padding: 10px;
+      font-size: 10px;
+    }
+
+    .recommendation-left .subsection {
+      margin-bottom: 8px;
+    }
+
+    .recommendation-left .subsection-title {
+      font-weight: bold;
+      text-decoration: underline;
+      margin-bottom: 3px;
+    }
+
+    .recommendation-right {
+      width: 50%;
+      padding: 10px;
+    }
+
+    .recommendation-right table {
+      margin-top: 0;
+    }
+
+    /* Other Information */
+    .other-info-section {
+      padding: 10px 20px;
+      font-size: 10px;
+    }
+
+    .other-info-section table {
+      border: none;
+    }
+
+    .other-info-section table td {
+      border: none;
+      padding: 3px 0;
+    }
+
+    .other-info-section .checkbox-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .other-info-section .checkbox-line:last-child {
+      border-bottom: none;
+    }
+
+    /* Parental Info Table */
+    .parental-table tbody tr:nth-child(odd) {
+      background-color: #f0f0f0;
+    }
+
+    /* Certification */
+    .certification-content {
+      padding: 10px 20px;
+      font-size: 10px;
+    }
+
+    .cert-text {
+      text-align: center;
+      margin-bottom: 15px;
+      line-height: 1.4;
+    }
+
+    .cert-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 30px;
+    }
+
+    .cert-left {
+      flex: 1;
+    }
+
+    .cert-right {
+      flex: 1;
+    }
+
+    .cert-right .title {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .cert-right p {
+      margin-bottom: 2px;
+    }
+
+    .submit-section {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 25px;
+    }
+
+    .btn-next {
+      background-color: #28a745;
+      color: white;
+      font-weight: 600;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin: 30px 30px;
+      font-family: Arial, sans-serif;
+      display: float;
+    }
+
+    .btn-next:hover {
+      background-color: #218838;
+    }
+
+    @media print {
+      .submit-section {
+        display: none;
+      }
+      .container {
+        border: none;
+        width: 100%;
+      }
+      .frame, .frame2 {
+        padding: 0;
+        background: white;
+      }
+    }
+
+/*Applicant info*/
+.value-cell3 {
+    padding: 0;
 }
 
-.notice-box {
-  background-color: #fffd8741;
-  border: 2px solid #cecd6c67;
-  border-radius: 3px;
-  box-sizing: border-box;
-  padding: 13px;
-  font-size: 13px;
+.cell-inner {
+ /*  border: 1px solid #000; border around each value */
+  padding: 3px;            /* spacing inside the box */
+  text-align: left;       /* center the text */
+  display: block;
+  margin: 1px;
 }
 
-.frame2 {
-  background-color: rgb(255, 255, 255);
-  padding: 25px 25px;           /* gives space inside the frame (top + sides) */
-  margin-top: 30px;             /* adds space above the entire frame */
-  box-sizing: border-box;
+.label-cell3 {
+    border: none;
+    padding: 2px 2px;   /* reduced padding for tighter spacing */
+    font-size: 9px;
+    color: #000000;
+    font-style: italic;
+    font-weight: bold;
+    line-height: 1.1;
 }
 
-.form-content {
-  padding: 30px;
-}
-
-.reference-line {
-  display: flex;
-  justify-content: space-between;
-  font-size: 15px;
-  margin-bottom: 20px;
-  color: #333;
-  font-family: 'Times New Roman', Times, serif;
-}
-
-.header-section1 {
-  display: flex;
-  align-items: flex-start;  /* align items at the top */
-  justify-content: space-between; /* spread left, center, right */
-  padding: 10px 50px; /* add some space on sides */
-  gap: 20px;
-}
-
-.logo-section {
-  display: flex;
-  align-items: center; /* centers text and image vertically */
-  gap: 10px;
-}
-
-.logo {
-  width: 150px;
-  height: 150px;
-  object-fit: cover; /* keeps the image circular and clean */
-  background-color: #fff;
-  margin-left: 50px;
-}
-
-.title-section {
-  flex-grow: 1;
-  margin-top: 10px;
-  text-align: center;
-}
-
-.app-number {
-  font-size: 15px;
-  text-align: right;
-  white-space: nowrap; /* keeps it in one line */
-  font-family: 'Times New Roman', Times, serif;
-  margin-left: 50px;
-}
-
-.university-name {
-  font-size: 30px;
-  font-weight: bold;
-  color: #000;
-  margin-bottom: 5px;
-  font-family: 'Times New Roman', Times, serif;
-}
-
-.university-subtitle {
-  font-size: 25px;
-  color: #c00;
-  font-weight: bold;
+.form-section {
+  /*border: 1px solid #000;*/
   margin-bottom: 3px;
 }
 
-.office-name {
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 10px;
-  font-family: 'Times New Roman', Times, serif;
+.info-table3 {
+    width: 100%;
+    margin-top: 1px;
+    border-collapse: separate; /* collapse borders so td borders show */
 }
 
-.form-title {
-  font-size: 30px;
-  font-weight: bold;
-  color: #000;
-  margin-bottom: 5px;
-  font-family: 'Times New Roman', Times, serif;
-}
-
-.form-subtitle {
-  font-size: 30px;
-  font-weight: bold;
-  color: #000;
-  font-family: 'Times New Roman', Times, serif;
-}
-
-.border {
-  border: 2px solid #333;
-  padding: 20px;
-  max-height: 400px; /* adjust as needed */
-  overflow-y: auto;   /* enables vertical scroll if content is too long */
-  background-color: #fff;
-}
-
-.privacy-container {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.privacy-text {
-  flex: 1; /* takes remaining space */
-  font-size: 15px;
-  line-height: 1.5;
-  font-style: italic;
-  font-family: 'Times New Roman', Times, serif;
-}
-
-.small-text {
-  font-size: 12px;
+/*PArental info*/
+.section-title{ 
+  margin-bottom: 2px;
   margin-top: 10px;
 }
 
-.photo-box {
-  width: 120px;
-  height: 150px;
-  border: 2px solid #333;
-  flex-shrink: 0; /* prevents shrinking */
-  background-color: #f9f9f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  color: #999;
+.form-section1 {
+  border: 1px solid #000;
+  margin-bottom: 3px;
 }
 
-/* Submit button */
-.submit-section {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 25px;
+.info-table {
+    width: 100%;
+    margin-top: 1px;
+    border-collapse: separate; /* collapse borders so td borders show */
 }
 
-.btn-next {
-  background-color: #28a745;
-  color: white;
-  font-weight: 600;
-  border: none;
-  padding: 15px 30px;
-  border-radius: 40px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  margin: 30px 30px;
+.value-cell1 {
+    padding: 0;
 }
 
-.btn-next:hover {
-  background-color: #218838;
+.cell-inner1 {
+  border: 1px solid #000; /* border around each value */
+  padding: 3px;            /* spacing inside the box */
+  text-align: left;       /* center the text */
+  display: block;
+  margin: 1px;
+}
+
+.label-cell1 {
+   /* border: 1px solid #000;*/
+    padding: 2px 2px;   /* reduced padding for tighter spacing */
+    font-size: 9px;
+    color: #000000;
+    font-style: italic;
+    font-weight: bold;
+    line-height: 1.1;
 }

@@ -1,13 +1,13 @@
 const downloads = [
-  'assets/grades_form_1.pdf', // for the first card
-  'assets/grades_form_2.pdf'  // for the second card
+  'assets/grades_form_1.pdf',
+  'assets/grades_form_2.pdf'
 ];
 
 document.querySelectorAll('.grade-card').forEach((card, index) => {
   card.addEventListener('click', () => {
     const link = document.createElement('a');
     link.href = downloads[index];
-    link.download = downloads[index].split('/').pop(); // set filename
+    link.download = downloads[index].split('/').pop();
     link.click();
   });
 });
@@ -25,24 +25,18 @@ const pageToStep = {
   "submit.html": 8,
 };
 
-// ====== Get current page ======
 const currentPage = window.location.pathname.split("/").pop();
-
-// ====== Load progress safely ======
 let savedStep = parseInt(localStorage.getItem("currentStep"));
 let currentStep = pageToStep[currentPage] !== undefined ? pageToStep[currentPage] : (savedStep || 5);
-
 let storedMax = parseInt(localStorage.getItem("maxUnlockedStep"));
 let maxUnlockedStep = (storedMax !== null && !isNaN(storedMax)) ? storedMax : currentStep;
 
 document.addEventListener("DOMContentLoaded", () => {
   const steps = document.querySelectorAll(".step");
 
-  // ====== Update step UI ======
   function updateSteps() {
     steps.forEach((step, index) => {
       step.classList.toggle("active", index === currentStep);
-
       if (index <= maxUnlockedStep) {
         step.classList.add("clickable");
         step.style.pointerEvents = "auto";
@@ -50,43 +44,22 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         step.classList.remove("clickable");
         step.style.pointerEvents = "none";
-        step.style.opacity = "1"; // locked steps look dim
+        step.style.opacity = "1";
       }
     });
-
     localStorage.setItem("currentStep", currentStep);
     localStorage.setItem("maxUnlockedStep", maxUnlockedStep);
   }
 
-  // ====== Save form fields (example for programs page) ======
-  const programSelect = document.querySelector("#programSelect"); // your select input
-  if (programSelect) {
-    // Load saved value
-    const savedProgram = localStorage.getItem("programSelectValue");
-    if (savedProgram) programSelect.value = savedProgram;
-
-    // Save on change
-    programSelect.addEventListener("change", () => {
-      localStorage.setItem("programSelectValue", programSelect.value);
-    });
-  }
-
-  // ====== Step click navigation ======
   steps.forEach((step, index) => {
     step.addEventListener("click", () => {
-      if (index > maxUnlockedStep) return; // block locked steps
-
+      if (index > maxUnlockedStep) return;
       currentStep = index;
-
-      // Optional: auto-unlock next step
       if (currentStep === maxUnlockedStep && maxUnlockedStep < steps.length - 1) {
         maxUnlockedStep++;
       }
-
       updateSteps();
-
       if (typeof showSection === "function") showSection(currentStep);
-
       switch (index) {
         case 0: window.location.href = "index.html"; break;
         case 1: window.location.href = "readfirst.html"; break;
@@ -106,12 +79,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Mapping programs to their available campuses
 document.addEventListener("DOMContentLoaded", () => {
-  // canonical campus list
   const allCampuses = [
     "Alangilan","Pablo Borbon","Malvar","Nasugbu","Lipa","San Juan","Aboitiz Lima","Lobo","Lemery","Rosario","Balayan","Mabini"
   ];
 
-  // your mapping (keeps your existing entries)
   const programCampuses = {
     "BS Agriculture - Animal Science": ["Lobo"],
     "BS Agriculture - Crop Science": ["Lobo"],
@@ -165,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
     "Bachelor of Technology and Livelihood Education - Home Economics": ["Pablo Borbon","San Juan","Rosario"]
   };
 
-  // helper: normalize keys case-insensitive
   function lookupCampusesByKey(key) {
     if (!key) return null;
     if (programCampuses[key]) return programCampuses[key];
@@ -173,10 +143,9 @@ document.addEventListener("DOMContentLoaded", () => {
     return found ? programCampuses[found] : null;
   }
 
-  // helper: populate a campus <select> element (replaces all options)
   function populateCampusSelect(campusSelect, campuses) {
     if (!campusSelect) return;
-    campusSelect.innerHTML = ""; // wipe
+    campusSelect.innerHTML = "";
     const placeholder = document.createElement("option");
     placeholder.value = "";
     placeholder.disabled = true;
@@ -186,15 +155,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     campuses.forEach(c => {
       const opt = document.createElement("option");
-      opt.value = c;       // keep values consistent with mapping
-      opt.textContent = c; // visible text
+      opt.value = c;
+      opt.textContent = c;
       campusSelect.appendChild(opt);
     });
 
-    if (campuses.length === 1) campusSelect.value = campuses[0]; // auto-select single option
+    if (campuses.length === 1) campusSelect.value = campuses[0];
   }
 
-  // find every row (.choice) and wire its inner selects
   const rows = document.querySelectorAll(".choice");
   if (!rows.length) {
     console.warn("[mapping] no .choice elements found.");
@@ -210,10 +178,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // initialize campus select with full list (use mapping keys' casing if you want)
     populateCampusSelect(campusSelect, allCampuses);
 
-    // when program changes update the campus select for that row only
     programSelect.addEventListener("change", () => {
       const opt = programSelect.options[programSelect.selectedIndex];
       const key = (opt && opt.value && opt.value.trim() !== "") ? opt.value.trim() : (opt ? opt.text.trim() : "");
@@ -221,7 +187,6 @@ document.addEventListener("DOMContentLoaded", () => {
       populateCampusSelect(campusSelect, matched);
     });
 
-    // if there's a preselected program (editing); apply mapping once now
     if (programSelect.selectedIndex > 0) {
       programSelect.dispatchEvent(new Event("change", { bubbles: true }));
     }
@@ -233,12 +198,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const programSelects = document.querySelectorAll('.choice-select select');
   const campusSelects = document.querySelectorAll('.campus-select select');
 
-  // Load saved values
   programSelects.forEach((select, index) => {
     const savedValue = localStorage.getItem(`program_choice_${index + 1}`);
     if (savedValue) {
       select.value = savedValue;
-      // Trigger change event to update campus options
       select.dispatchEvent(new Event('change'));
     }
   });
@@ -246,14 +209,12 @@ document.addEventListener("DOMContentLoaded", () => {
   campusSelects.forEach((select, index) => {
     const savedValue = localStorage.getItem(`campus_choice_${index + 1}`);
     if (savedValue) {
-      // Small delay to ensure campus options are populated first
       setTimeout(() => {
         select.value = savedValue;
       }, 100);
     }
   });
 
-  // Save on change
   programSelects.forEach((select, index) => {
     select.addEventListener('change', () => {
       localStorage.setItem(`program_choice_${index + 1}`, select.value);
@@ -272,6 +233,8 @@ const nextBtn = document.getElementById('nextBtn');
 const errorNotif = document.getElementById('error-notif');
 
 nextBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  
   let allFilled = true;
   const rows = document.querySelectorAll('.choice');
 
@@ -279,7 +242,6 @@ nextBtn.addEventListener('click', (e) => {
     const programSelect = row.querySelector('.choice-select select');
     const campusSelect = row.querySelector('.campus-select select');
 
-    // Check if program is selected
     if (!programSelect.value) {
       allFilled = false;
       programSelect.classList.add('error');
@@ -288,7 +250,6 @@ nextBtn.addEventListener('click', (e) => {
       programSelect.classList.remove('error');
     }
 
-    // Check if campus is selected (and if it's required)
     if (programSelect.value && !campusSelect.value) {
       allFilled = false;
       campusSelect.classList.add('error');
@@ -297,18 +258,36 @@ nextBtn.addEventListener('click', (e) => {
       campusSelect.classList.remove('error');
     }
 
-    // Remove row error only if both are valid
     if (programSelect.value && campusSelect.value) {
       row.classList.remove('row-error');
     }
   });
 
   if (!allFilled) {
-    e.preventDefault();
     showError();
-  } else {
-    window.location.href = 'form.html';
+    return;
   }
+
+  // ============================================
+  // 🔥 SAVE PROGRAM DATA BEFORE NAVIGATION
+  // ============================================
+  
+  const programRows = document.querySelectorAll('.choice');
+  
+  const programData = {
+    firstChoice: programRows[0]?.querySelector('.choice-select select')?.value || '',
+    firstCampus: programRows[0]?.querySelector('.campus-select select')?.value || '',
+    secondChoice: programRows[1]?.querySelector('.choice-select select')?.value || '',
+    secondCampus: programRows[1]?.querySelector('.campus-select select')?.value || '',
+    thirdChoice: programRows[2]?.querySelector('.choice-select select')?.value || '',
+    thirdCampus: programRows[2]?.querySelector('.campus-select select')?.value || ''
+  };
+
+  localStorage.setItem('programData', JSON.stringify(programData));
+  
+  console.log('✅ Program data saved:', programData);
+
+  window.location.href = 'form.html';
 });
 
 // ===== REMOVE HIGHLIGHT WHEN USER FIXES ANSWER =====
@@ -318,12 +297,10 @@ document.querySelectorAll('.choice-select select, .campus-select select').forEac
     const programSelect = row.querySelector('.choice-select select');
     const campusSelect = row.querySelector('.campus-select select');
 
-    // Remove error from changed field
     if (field.value) {
       field.classList.remove('error');
     }
 
-    // Remove row error only if both are filled
     if (programSelect.value && campusSelect.value) {
       row.classList.remove('row-error');
     }
@@ -334,13 +311,11 @@ document.querySelectorAll('.choice-select select, .campus-select select').forEac
 function showError() {
   errorNotif.style.display = 'block';
   setTimeout(() => {
-    errorNotif.style.opacity = 1; // fade in
+    errorNotif.style.opacity = 1;
   }, 10);
 
-  // Fade out after 3 seconds
   setTimeout(() => {
     errorNotif.style.opacity = 0;
-    // hide completely after fade out
     setTimeout(() => {
       errorNotif.style.display = 'none';
     }, 500);
