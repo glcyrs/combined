@@ -171,6 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
+
       // PERSONAL INFORMATION - with null checks
       const setTextContent = (id, value) => {
         const el = document.getElementById(id);
@@ -213,6 +214,36 @@ document.addEventListener("DOMContentLoaded", () => {
       setTextContent('scienceGrade10', gradesData.scienceGrade10);
       setTextContent('scienceGrade11_1st', gradesData.scienceGrade11_1st);
       setTextContent('scienceGrade11_2nd', gradesData.scienceGrade11_2nd);
+
+      const gradesTable = document.querySelector('.info-table tbody');
+      if (gradesTable && gradesData) {
+        const rows = gradesTable.querySelectorAll('tr');
+        
+        // English row (index 0)
+        if (rows[0]) {
+          const cells = rows[0].querySelectorAll('td');
+          if (cells[4]) cells[4].textContent = gradesData.englishGrade10 || '';
+          if (cells[5]) cells[5].textContent = gradesData.englishGrade11_1st || '';
+          if (cells[6]) cells[6].textContent = gradesData.englishGrade11_2nd || '';
+        }
+        
+        // Mathematics row (index 1)
+        if (rows[1]) {
+          const cells = rows[1].querySelectorAll('td');
+          if (cells[4]) cells[4].textContent = gradesData.mathGrade10 || '';
+          if (cells[5]) cells[5].textContent = gradesData.mathGrade11_1st || '';
+          if (cells[6]) cells[6].textContent = gradesData.mathGrade11_2nd || '';
+        }
+        
+        // Science row (index 2)
+        if (rows[2]) {
+          const cells = rows[2].querySelectorAll('td');
+          if (cells[4]) cells[4].textContent = gradesData.scienceGrade10 || '';
+          if (cells[5]) cells[5].textContent = gradesData.scienceGrade11_1st || '';
+          if (cells[6]) cells[6].textContent = gradesData.scienceGrade11_2nd || '';
+        }
+      }
+
 
       // PROGRAM CHOICESS 
       const programTable = document.querySelector('.right-column table tbody');
