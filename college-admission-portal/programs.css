@@ -250,11 +250,17 @@ body {
 }
 
 .section-header {
-    background-color: #28a745;
-    color: white;
-    padding: 12px 20px;
+    background-color: #28A745;
+    color: #FFFFFF;
+    padding: 15px 23px;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 18px;
+    border-radius:3px;
+    margin-left: -50px;
+    margin-right: -50px;
+    margin-top: -30px;
+    margin: 0;
+    text-align: left;
 }
 
 .content {
@@ -521,19 +527,22 @@ body {
 }
 
 .btn-next {
-  background-color: #28a745;
+  background-color: #5CB85C;
   color: white;
-  font-weight: 600;
   border: none;
-  padding: 15px 30px;
   border-radius: 40px;
+  padding: 12px 30px;
+  font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s;
-  margin: 30px 30px;
+  float: right;
+  transition: background-color 0.3s ease;
+  margin-top: 30px;
+  margin-right: 30px;
+  margin-bottom: 30px;
 }
 
 .btn-next:hover {
-  background-color: #218838;
+  background-color: #4cae4c;
 }
 
 .error-notif {

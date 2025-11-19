@@ -122,10 +122,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // POPULATE TRANSFER STATUS IN EDUCATIONAL INFORMATION
       const educationalTables = document.querySelectorAll('.form-section table');
       if (educationalTables.length > 0) {
-        const educationalTable = educationalTables[0]; // First table is educational info
+        const educationalTable = educationalTables[0];
         const allRows = educationalTable.querySelectorAll('tr');
         
-        // Find the row with transfer question
         allRows.forEach(row => {
           const cell = row.querySelector('td[colspan="2"]');
           if (cell && cell.innerHTML.includes('Have you ever transferred')) {
@@ -146,41 +145,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
 
-      console.log('Confirmation data loaded:', {
-        academicStatus,
-        alreadyEnrolled,
-        firstTimeApplying,
-        transferred,
-        transferredFrom,
-        transferredYear,
-        bsuGraduate,
-        bsuSchool
-      });
-
-            // POPULATE AAP CHECKBOXES
+      // POPULATE AAP CHECKBOXES
       const aapCheckboxes = document.querySelectorAll('.instructions-right .checkbox-item');
       if (aapCheckboxes.length >= 10 && aapSelection) {
-        // Reset all AAP checkboxes to unchecked first
-        for (let i = 2; i < 10; i++) { // AAP starts at index 2
+        for (let i = 2; i < 10; i++) {
           if (aapCheckboxes[i]) {
             const div = aapCheckboxes[i].querySelector('div');
             if (div) {
-              const text = div.textContent.trim();
               div.innerHTML = '☐ ' + div.innerHTML.substring(div.innerHTML.indexOf('<i>'));
             }
           }
         }
 
-        // Map AAP values to checkbox indices
         const aapMap = {
-          'als': 2,           // Alternative Learning System Graduate
-          'indigent': 3,      // Indigent Applicant
-          'indigenous': 4,    // Indigenous Applicant
-          'pwd': 5,           // Person with Disability (PWD)
-          'iskolar': 6,       // Iskolar ng Bayan
-          'solo-parent': 7,   // Children of Solo Parents
-          'lab-school': 8,    // Integrated School / Laboratory School
-          'none': 9           // None
+          'als': 2, 'indigent': 3, 'indigenous': 4, 'pwd': 5,
+          'iskolar': 6, 'solo-parent': 7, 'lab-school': 8, 'none': 9
         };
 
         const checkboxIndex = aapMap[aapSelection];
@@ -192,168 +171,116 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      console.log('AAP data loaded:', { aapSelection });
+      // PERSONAL INFORMATION - with null checks
+      const setTextContent = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value || '';
+      };
 
-      // PERSONAL INFORMATION
-      if (document.getElementById('userEmail')) {
-        document.getElementById('userEmail').textContent = personalData.email || 'user@gmail.com';
-      }
-      if (document.getElementById('surname')) {
-        document.getElementById('surname').textContent = personalData.surname || '';
-      }
-      if (document.getElementById('firstName')) {
-        document.getElementById('firstName').textContent = personalData.firstName || '';
-      }
-      if (document.getElementById('middleName')) {
-        document.getElementById('middleName').textContent = personalData.middleName || '';
-      }
-      if (document.getElementById('address')) {
-        document.getElementById('address').textContent = personalData.address || '';
-      }
-      if (document.getElementById('zipCode')) {
-        document.getElementById('zipCode').textContent = personalData.zipCode || '';
-      }
-      if (document.getElementById('dateOfBirth')) {
-        document.getElementById('dateOfBirth').textContent = personalData.dateOfBirth || '';
-      }
-      if (document.getElementById('sex')) {
-        document.getElementById('sex').textContent = personalData.sex || '';
-      }
-      if (document.getElementById('age')) {
-        document.getElementById('age').textContent = personalData.age || '';
-      }
-      if (document.getElementById('religion')) {
-        document.getElementById('religion').textContent = personalData.religion || '';
-      }
-      if (document.getElementById('nationality')) {
-        document.getElementById('nationality').textContent = personalData.nationality || '';
-      }
-      if (document.getElementById('contactPerson')) {
-        document.getElementById('contactPerson').textContent = personalData.contactPerson || '';
-      }
-      if (document.getElementById('mobileNumber')) {
-        document.getElementById('mobileNumber').textContent = personalData.mobileNumber || '';
-      }
-      if (document.getElementById('landlineNumber')) {
-        document.getElementById('landlineNumber').textContent = personalData.landlineNumber || 'N/A';
-      }
-      if (document.getElementById('email')) {
-        document.getElementById('email').textContent = personalData.email || '';
-      }
-      if (document.getElementById('contactAddress')) {
-        document.getElementById('contactAddress').textContent = personalData.contactAddress || '';
-      }
-      if (document.getElementById('contactNumber')) {
-        document.getElementById('contactNumber').textContent = personalData.contactNumber || '';
-      }
-      if (document.getElementById('contactRelationship')) {
-        document.getElementById('contactRelationship').textContent = personalData.contactRelationship || '';
-      }
+      setTextContent('userEmail', personalData.email || 'user@gmail.com');
+      setTextContent('surname', personalData.surname);
+      setTextContent('firstName', personalData.firstName);
+      setTextContent('middleName', personalData.middleName);
+      setTextContent('address', personalData.address);
+      setTextContent('zipCode', personalData.zipCode);
+      setTextContent('dateOfBirth', personalData.dateOfBirth);
+      setTextContent('sex', personalData.sex);
+      setTextContent('age', personalData.age);
+      setTextContent('religion', personalData.religion);
+      setTextContent('nationality', personalData.nationality);
+      setTextContent('contactPerson', personalData.contactPerson);
+      setTextContent('mobileNumber', personalData.mobileNumber);
+      setTextContent('landlineNumber', personalData.landlineNumber || 'N/A');
+      setTextContent('email', personalData.email);
+      setTextContent('contactAddress', personalData.contactAddress);
+      setTextContent('contactNumber', personalData.contactNumber);
+      setTextContent('contactRelationship', personalData.contactRelationship);
 
       // EDUCATIONAL INFORMATION
-      if (document.getElementById('seniorHighSchool')) {
-        document.getElementById('seniorHighSchool').textContent = educationData.seniorHighSchool || '';
-      }
-      if (document.getElementById('track')) {
-        document.getElementById('track').textContent = educationData.track || '';
-      }
-      if (document.getElementById('specialization')) {
-        document.getElementById('specialization').textContent = educationData.specialization || 'N/A';
-      }
-      if (document.getElementById('jhsYear')) {
-        document.getElementById('jhsYear').textContent = educationData.jhsYear || '';
-      }
-      if (document.getElementById('shsYear')) {
-        document.getElementById('shsYear').textContent = educationData.shsYear || '';
-      }
+      setTextContent('seniorHighSchool', educationData.seniorHighSchool);
+      setTextContent('track', educationData.track);
+      setTextContent('specialization', educationData.specialization || 'N/A');
+      setTextContent('jhsYear', educationData.jhsYear);
+      setTextContent('shsYear', educationData.shsYear);
 
-      // GRADES - Update the table cells
-      if (document.getElementById('englishGrade10')) {
-        document.getElementById('englishGrade10').textContent = gradesData.englishGrade10 || '';
-      }
-      if (document.getElementById('englishGrade11_1st')) {
-        document.getElementById('englishGrade11_1st').textContent = gradesData.englishGrade11_1st || '';
-      }
-      if (document.getElementById('englishGrade11_2nd')) {
-        document.getElementById('englishGrade11_2nd').textContent = gradesData.englishGrade11_2nd || '';
-      }
-      if (document.getElementById('mathGrade10')) {
-        document.getElementById('mathGrade10').textContent = gradesData.mathGrade10 || '';
-      }
-      if (document.getElementById('mathGrade11_1st')) {
-        document.getElementById('mathGrade11_1st').textContent = gradesData.mathGrade11_1st || '';
-      }
-      if (document.getElementById('mathGrade11_2nd')) {
-        document.getElementById('mathGrade11_2nd').textContent = gradesData.mathGrade11_2nd || '';
-      }
-      if (document.getElementById('scienceGrade10')) {
-        document.getElementById('scienceGrade10').textContent = gradesData.scienceGrade10 || '';
-      }
-      if (document.getElementById('scienceGrade11_1st')) {
-        document.getElementById('scienceGrade11_1st').textContent = gradesData.scienceGrade11_1st || '';
-      }
-      if (document.getElementById('scienceGrade11_2nd')) {
-        document.getElementById('scienceGrade11_2nd').textContent = gradesData.scienceGrade11_2nd || '';
-      }
+      // GRADES
+      setTextContent('englishGrade10', gradesData.englishGrade10);
+      setTextContent('englishGrade11_1st', gradesData.englishGrade11_1st);
+      setTextContent('englishGrade11_2nd', gradesData.englishGrade11_2nd);
+      setTextContent('mathGrade10', gradesData.mathGrade10);
+      setTextContent('mathGrade11_1st', gradesData.mathGrade11_1st);
+      setTextContent('mathGrade11_2nd', gradesData.mathGrade11_2nd);
+      setTextContent('scienceGrade10', gradesData.scienceGrade10);
+      setTextContent('scienceGrade11_1st', gradesData.scienceGrade11_1st);
+      setTextContent('scienceGrade11_2nd', gradesData.scienceGrade11_2nd);
 
       // PROGRAM CHOICES
-      if (document.getElementById('firstChoice')) {
-        document.getElementById('firstChoice').textContent = programData.firstChoice || '';
-      }
-      if (document.getElementById('firstCampus')) {
-        document.getElementById('firstCampus').textContent = programData.firstCampus || '';
-      }
-      if (document.getElementById('secondChoice')) {
-        document.getElementById('secondChoice').textContent = programData.secondChoice || '';
-      }
-      if (document.getElementById('secondCampus')) {
-        document.getElementById('secondCampus').textContent = programData.secondCampus || '';
-      }
-      if (document.getElementById('thirdChoice')) {
-        document.getElementById('thirdChoice').textContent = programData.thirdChoice || '';
-      }
-      if (document.getElementById('thirdCampus')) {
-        document.getElementById('thirdCampus').textContent = programData.thirdCampus || '';
-      }
+      setTextContent('firstChoice', programData.firstChoice);
+      setTextContent('firstCampus', programData.firstCampus);
+      setTextContent('secondChoice', programData.secondChoice);
+      setTextContent('secondCampus', programData.secondCampus);
+      setTextContent('thirdChoice', programData.thirdChoice);
+      setTextContent('thirdCampus', programData.thirdCampus);
 
-      // PARENTAL INFORMATION
+      // PARENTAL INFORMATION - with better null checking
       const parentalTable = document.querySelector('.form-section1 table');
       if (parentalTable && parentalData) {
         const rows = parentalTable.querySelectorAll('tr');
         
-        // Mother's info (first data row)
+        // Mother's info
         if (rows[0]) {
           const cells = rows[0].querySelectorAll('td');
-          if (cells[0]) cells[0].querySelector('.cell-inner').textContent = parentalData.motherName || '';
-          if (cells[1]) cells[1].querySelector('.cell-inner').textContent = parentalData.motherAge || '';
-          if (cells[2]) cells[2].querySelector('.cell-inner').textContent = parentalData.motherOccupation || '';
-          if (cells[3]) cells[3].querySelector('.cell-inner').textContent = parentalData.motherIncome || '';
-          if (cells[4]) cells[4].querySelector('.cell-inner').textContent = parentalData.motherContact || '';
+          const motherInner0 = cells[0]?.querySelector('.cell-inner');
+          const motherInner1 = cells[1]?.querySelector('.cell-inner');
+          const motherInner2 = cells[2]?.querySelector('.cell-inner');
+          const motherInner3 = cells[3]?.querySelector('.cell-inner');
+          const motherInner4 = cells[4]?.querySelector('.cell-inner');
+          
+          if (motherInner0) motherInner0.textContent = parentalData.motherName || '';
+          if (motherInner1) motherInner1.textContent = parentalData.motherAge || '';
+          if (motherInner2) motherInner2.textContent = parentalData.motherOccupation || '';
+          if (motherInner3) motherInner3.textContent = parentalData.motherIncome || '';
+          if (motherInner4) motherInner4.textContent = parentalData.motherContact || '';
         }
         
-        // Father's info (third data row, skipping labels)
+        // Father's info
         if (rows[2]) {
           const cells = rows[2].querySelectorAll('td');
-          if (cells[0]) cells[0].querySelector('.cell-inner').textContent = parentalData.fatherName || '';
-          if (cells[1]) cells[1].querySelector('.cell-inner').textContent = parentalData.fatherAge || '';
-          if (cells[2]) cells[2].querySelector('.cell-inner').textContent = parentalData.fatherOccupation || '';
-          if (cells[3]) cells[3].querySelector('.cell-inner').textContent = parentalData.fatherIncome || '';
-          if (cells[4]) cells[4].querySelector('.cell-inner').textContent = parentalData.fatherContact || '';
+          const fatherInner0 = cells[0]?.querySelector('.cell-inner');
+          const fatherInner1 = cells[1]?.querySelector('.cell-inner');
+          const fatherInner2 = cells[2]?.querySelector('.cell-inner');
+          const fatherInner3 = cells[3]?.querySelector('.cell-inner');
+          const fatherInner4 = cells[4]?.querySelector('.cell-inner');
+          
+          if (fatherInner0) fatherInner0.textContent = parentalData.fatherName || '';
+          if (fatherInner1) fatherInner1.textContent = parentalData.fatherAge || '';
+          if (fatherInner2) fatherInner2.textContent = parentalData.fatherOccupation || '';
+          if (fatherInner3) fatherInner3.textContent = parentalData.fatherIncome || '';
+          if (fatherInner4) fatherInner4.textContent = parentalData.fatherContact || '';
         }
       }
 
-      // LOAD SAVED PHOTO AT THE END
-      const savedPhoto = localStorage.getItem("savedPhoto");
-      const photoBox = document.getElementById("photoPreview");
-      
-      if (savedPhoto && photoBox) {
-        photoBox.style.backgroundImage = `url('${savedPhoto}')`;
-        photoBox.style.backgroundSize = "cover";
-        photoBox.style.backgroundPosition = "center";
-        photoBox.style.backgroundRepeat = "no-repeat";
-        photoBox.textContent = ""; // Remove "2x2 Photo" text
-        console.log('✅ Photo loaded in form preview');
-      }
+      // 🔥 LOAD SAVED PHOTO - FIXED VERSION
+      setTimeout(() => {
+        const savedPhoto = localStorage.getItem("savedPhoto");
+        const photoBox = document.getElementById("photoPreview");
+        
+        console.log('🔍 Checking for saved photo...');
+        console.log('Photo exists:', !!savedPhoto);
+        console.log('PhotoBox element found:', !!photoBox);
+        
+        if (savedPhoto && photoBox) {
+          photoBox.innerHTML = "";
+          photoBox.style.backgroundImage = `url('${savedPhoto}')`;
+          photoBox.style.backgroundSize = "cover";
+          photoBox.style.backgroundPosition = "center";
+          photoBox.style.backgroundRepeat = "no-repeat";
+          
+          console.log('✅ Photo loaded successfully in form preview');
+        } else {
+          console.log('❌ Photo loading failed');
+        }
+      }, 100);
 
       console.log('Form populated successfully from localStorage');
     } catch (error) {
