@@ -265,6 +265,38 @@ window.removeFile = function (fileNumber) {
 };
 
 // =====================================================
+// SYNC GRADES TO GRADESDATA FORMAT
+// =====================================================
+function syncGradesToGradesData() {
+  const gradesData = {
+    // Junior High School Grades (Grade 10)
+    englishGrade10: document.querySelector('input[name="jhsEnglish"]')?.value || '',
+    mathGrade10: document.querySelector('input[name="jhsMath"]')?.value || '',
+    scienceGrade10: document.querySelector('input[name="jhsScience"]')?.value || '',
+    
+    // Senior High School Grade 11 - First Semester
+    englishGrade11_1st: document.querySelector('input[name="g11EnglishGrade1"]')?.value || '',
+    mathGrade11_1st: document.querySelector('input[name="g11MathGrade1"]')?.value || '',
+    scienceGrade11_1st: document.querySelector('input[name="g11ScienceGrade1"]')?.value || '',
+    
+    // Senior High School Grade 11 - Second Semester
+    englishGrade11_2nd: document.querySelector('input[name="g11EnglishGrade2"]')?.value || '',
+    mathGrade11_2nd: document.querySelector('input[name="g11MathGrade2"]')?.value || '',
+    scienceGrade11_2nd: document.querySelector('input[name="g11ScienceGrade2"]')?.value || '',
+    
+    // Store alternative subjects if selected
+    mathAlt1: document.querySelector('select[name="g11MathAlt1"]')?.value || '',
+    mathAlt2: document.querySelector('select[name="g11MathAlt2"]')?.value || '',
+    scienceAlt1: document.querySelector('select[name="g11ScienceAlt1"]')?.value || '',
+    scienceAlt2: document.querySelector('select[name="g11ScienceAlt2"]')?.value || '',
+    englishAlt1: document.querySelector('select[name="g11EnglishAlt1"]')?.value || ''
+  };
+
+  localStorage.setItem('gradesData', JSON.stringify(gradesData));
+  console.log('✅ Grades synced to gradesData format:', gradesData);
+}
+
+// =====================================================
 // FORM VALIDATION & NEXT BUTTON
 // =====================================================
 (function setupNextButton() {
@@ -375,26 +407,42 @@ window.removeFile = function (fileNumber) {
     // 🔥 SAVE EDUCATION & GRADES DATA BEFORE NAVIGATION
     // ============================================
 
-    const seniorHighSchoolField = document.querySelector('input[name="senior_high_school"]');
+    const seniorHighSchoolField = document.querySelector('input#seniorHighSchool');
     const trackField = document.querySelector('select[name="track"]');
+    const strandField = document.querySelector('select[name="strand"]');
     const specializationField = document.querySelector('input[name="specialization"]');
 
     const educationData = {
       seniorHighSchool: seniorHighSchoolField?.value.toUpperCase() || '',
       track: trackField?.value || '',
-      specialization: specializationField?.value || 'N/A'
+      strand: strandField?.value || '',
+      specialization: specializationField?.value || 'N/A',
+      jhsYear: document.querySelector('input[name="jhsCompletionYear"]')?.value || '',
+      shsYear: document.querySelector('input[name="shsCompletionYear"]')?.value || ''
     };
 
     const gradesData = {
-      englishGrade10: document.querySelector('input[name="english_g10"]')?.value || '',
-      mathGrade10: document.querySelector('input[name="math_g10"]')?.value || '',
-      scienceGrade10: document.querySelector('input[name="science_g10"]')?.value || '',
-      englishGrade11_1st: document.querySelector('input[name="english_g11_1"]')?.value || '',
-      mathGrade11_1st: document.querySelector('input[name="math_g11_1"]')?.value || '',
-      scienceGrade11_1st: document.querySelector('input[name="science_g11_1"]')?.value || '',
-      englishGrade11_2nd: document.querySelector('input[name="english_g11_2"]')?.value || '',
-      mathGrade11_2nd: document.querySelector('input[name="math_g11_2"]')?.value || '',
-      scienceGrade11_2nd: document.querySelector('input[name="science_g11_2"]')?.value || ''
+      // Junior High School Grades (Grade 10)
+      englishGrade10: document.querySelector('input[name="jhsEnglish"]')?.value || '',
+      mathGrade10: document.querySelector('input[name="jhsMath"]')?.value || '',
+      scienceGrade10: document.querySelector('input[name="jhsScience"]')?.value || '',
+      
+      // Senior High School Grade 11 - First Semester
+      englishGrade11_1st: document.querySelector('input[name="g11EnglishGrade1"]')?.value || '',
+      mathGrade11_1st: document.querySelector('input[name="g11MathGrade1"]')?.value || '',
+      scienceGrade11_1st: document.querySelector('input[name="g11ScienceGrade1"]')?.value || '',
+      
+      // Senior High School Grade 11 - Second Semester
+      englishGrade11_2nd: document.querySelector('input[name="g11EnglishGrade2"]')?.value || '',
+      mathGrade11_2nd: document.querySelector('input[name="g11MathGrade2"]')?.value || '',
+      scienceGrade11_2nd: document.querySelector('input[name="g11ScienceGrade2"]')?.value || '',
+      
+      // Store alternative subjects if selected
+      mathAlt1: document.querySelector('select[name="g11MathAlt1"]')?.value || '',
+      mathAlt2: document.querySelector('select[name="g11MathAlt2"]')?.value || '',
+      scienceAlt1: document.querySelector('select[name="g11ScienceAlt1"]')?.value || '',
+      scienceAlt2: document.querySelector('select[name="g11ScienceAlt2"]')?.value || '',
+      englishAlt1: document.querySelector('select[name="g11EnglishAlt1"]')?.value || ''
     };
 
     localStorage.setItem('educationData', JSON.stringify(educationData));
@@ -432,6 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem(`jhs-${input.name}`, input.value);
       input.classList.remove("input-error");
       checkContainerHighlight(content1Box, jhsInputs);
+      syncGradesToGradesData(); // 🔥 Sync to gradesData format
     });
   });
 
@@ -457,6 +506,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
       if (!empty) content2Box.classList.remove("input-error");
+      syncGradesToGradesData(); // 🔥 Sync to gradesData format
     });
   });
 
@@ -466,6 +516,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     select.addEventListener("change", () => {
       localStorage.setItem(`shs-${select.name}`, select.value);
+      syncGradesToGradesData(); // 🔥 Sync to gradesData format
     });
   });
 
@@ -514,6 +565,9 @@ document.addEventListener("DOMContentLoaded", () => {
       field.classList.remove("input-error");
     });
   });
+
+  // 🔥 Initial sync on page load
+  syncGradesToGradesData();
 });
 
 updateFileList();
