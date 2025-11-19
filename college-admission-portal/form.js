@@ -197,6 +197,12 @@ document.addEventListener("DOMContentLoaded", () => {
       setTextContent('contactMobile', personalData.contactMobile);
       setTextContent('contactRelationship', personalData.contactRelationship);
 
+      // Handle "Others" relationship option
+      const contactRel = document.getElementById('contactRelationship');
+      if (contactRel && personalData.contactRelationship === 'Others' && personalData.otherRelationship) {
+          contactRel.textContent = personalData.otherRelationship.toUpperCase();
+      }
+
       // EDUCATIONAL INFORMATION
       setTextContent('seniorHighSchool', educationData.seniorHighSchool);
       setTextContent('track', educationData.track);

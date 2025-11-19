@@ -851,35 +851,46 @@ if (middleNameValue === "") {
   }
 
   const personalData = {
-    surname: document.getElementById('lastName')?.value.toUpperCase() || '',
-    firstName: document.getElementById('firstName')?.value.toUpperCase() || '',
-    middleName: document.getElementById('middleName')?.value || '',
-    address: fullAddress,
-    zipCode: document.getElementById('zipCode')?.value || '',
-    dateOfBirth: birthdateStr,
-    sex: sex?.value.toUpperCase() || '',
-    age: calculatedAge,
-    religion: document.getElementById('religion')?.value || '',
-    nationality: nationality.value === 'Other' ? otherNationality.value.toUpperCase() : nationality.value.toUpperCase(),
-    mobileNumber: document.getElementById('mobile')?.value || '',
-    landlineNumber: document.getElementById('telephone')?.value || 'N/A',
-    email: document.getElementById('email')?.value || '',
-    contactPerson: document.getElementById('contactName')?.value.toUpperCase() || ''
+      surname: document.getElementById('lastName')?.value.toUpperCase() || '',
+      firstName: document.getElementById('firstName')?.value.toUpperCase() || '',
+      middleName: document.getElementById('middleName')?.value || '',
+      address: fullAddress,
+      zipCode: document.getElementById('zipCode')?.value || '',
+      dateOfBirth: birthdateStr,
+      sex: sex?.value.toUpperCase() || '',
+      age: calculatedAge,
+      religion: document.getElementById('religion')?.value || '',
+      nationality: nationality.value === 'Other' ? otherNationality.value.toUpperCase() : nationality.value.toUpperCase(),
+      mobileNumber: document.getElementById('mobile')?.value || '',
+      landlineNumber: document.getElementById('telephone')?.value || 'N/A',
+      email: document.getElementById('email')?.value || '',
+      contactPerson: document.getElementById('contactName')?.value.toUpperCase() || '',
+      contactAddress: document.getElementById('contactAddress')?.value.toUpperCase() || '',
+      contactMobile: document.getElementById('contactMobile')?.value || '',
+      contactRelationship: document.getElementById('contactRelationship')?.value || ''
   };
 
   const parentsTable = document.getElementById('parentsBox');
   const parentRows = parentsTable.querySelectorAll('tr');
   
-  const parentalData = {
-    motherName: parentRows[0]?.cells[0]?.textContent.trim().toUpperCase() || '',
-    motherAge: parentRows[0]?.cells[1]?.textContent.trim() || '',
-    motherOccupation: parentRows[0]?.cells[2]?.textContent.trim().toUpperCase() || '',
-    motherContact: parentRows[0]?.cells[3]?.textContent.trim() || '',
-    fatherName: parentRows[1]?.cells[0]?.textContent.trim().toUpperCase() || '',
-    fatherAge: parentRows[1]?.cells[1]?.textContent.trim() || '',
-    fatherOccupation: parentRows[1]?.cells[2]?.textContent.trim().toUpperCase() || '',
-    fatherContact: parentRows[1]?.cells[3]?.textContent.trim() || ''
-  };
+  // Father row = row 2
+  // Mother row = row 4
+
+const parentalData = {
+        fatherLast:        getValue("fatherLast"),
+        fatherFirst:       getValue("fatherFirst"),
+        fatherMiddle:      getValue("fatherMiddle"),
+        fatherAge:         getValue("fatherAge"),
+        fatherOccupation:  getValue("fatherOccupation"),
+        fatherContact:     getValue("fatherContact"),
+
+        motherLast:        getValue("motherLast"),
+        motherFirst:       getValue("motherFirst"),
+        motherMiddle:      getValue("motherMiddle"),
+        motherAge:         getValue("motherAge"),
+        motherOccupation:  getValue("motherOccupation"),
+        motherContact:     getValue("motherContact"),
+};
 
   localStorage.setItem('personalData', JSON.stringify(personalData));
   localStorage.setItem('parentalData', JSON.stringify(parentalData));
@@ -888,18 +899,51 @@ if (middleNameValue === "") {
   console.log('✅ Parental data saved:', parentalData);
 
   window.location.href = "educattach.html";
+
+// =============================
+// AUTO-LOAD SAVED VALUES
+// =============================
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("[contenteditable='true']").forEach(cell => {
+        const key = cell.dataset.key;
+        if (key) {
+            const savedValue = localStorage.getItem(key);
+            if (savedValue) cell.textContent = savedValue;
+        }
+    });
+});
+
+
+// =============================
+// AUTO-SAVE WHEN USER TYPES
+// =============================
+document.querySelectorAll("[contenteditable='true']").forEach(cell => {
+    cell.addEventListener("input", () => {
+        const key = cell.dataset.key;
+        if (key) {
+            localStorage.setItem(key, cell.innerText.trim());
+        }
+    });
+});
+
+// =============================
+// HELPER: GET VALUE USING data-key
+// =============================
+function getValue(key) {
+    const cell = document.querySelector(`[data-key="${key}"]`);
+    if (!cell) return "";
+
+    let value = cell.textContent.trim();
+
+    // Auto-uppercase names + occupations
+    if (key.includes("Last") || key.includes("First") || key.includes("Middle") || key.includes("Occupation")) {
+        value = value.toUpperCase();
+    }
+
+    return value;
 }
 
-document.getElementById('nationality').addEventListener('change', function() {
-  const otherContainer = document.getElementById('otherNationalityContainer');
-  if (this.value === "Other") {
-    otherContainer.style.display = "block";
-  } else {
-    otherContainer.style.display = "none";
-    document.getElementById('otherNationality').value = "";
-    document.getElementById('otherNationality').classList.remove('error');
-  }
-});
+}
 
 // ====================== SAVE PROGRESS SYSTEM ======================
 
