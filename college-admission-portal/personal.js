@@ -551,6 +551,15 @@ if (!savedPhoto && (!photo.files || !photo.files[0])) {
     houseNo.classList.remove('error');
   }
 
+// Middle Name (optional)
+const middleName = document.getElementById('middleName');
+let middleNameValue = middleName.value.trim();
+
+// If empty → use dash
+if (middleNameValue === "") {
+    middleNameValue = "–";
+}
+
   const contactRelationship = document.getElementById('contactRelationship');
   const otherRelationship = document.getElementById('otherRelationship');
 
