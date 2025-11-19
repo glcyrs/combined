@@ -214,13 +214,41 @@ document.addEventListener("DOMContentLoaded", () => {
       setTextContent('scienceGrade11_1st', gradesData.scienceGrade11_1st);
       setTextContent('scienceGrade11_2nd', gradesData.scienceGrade11_2nd);
 
-      // PROGRAM CHOICES
-      setTextContent('firstChoice', programData.firstChoice);
-      setTextContent('firstCampus', programData.firstCampus);
-      setTextContent('secondChoice', programData.secondChoice);
-      setTextContent('secondCampus', programData.secondCampus);
-      setTextContent('thirdChoice', programData.thirdChoice);
-      setTextContent('thirdCampus', programData.thirdCampus);
+      // PROGRAM CHOICESS 
+      const programTable = document.querySelector('.right-column table tbody');
+      if (programTable && programData) {
+        const rows = programTable.querySelectorAll('tr');
+        
+        // First Choice
+        if (rows[0]) {
+          const cells = rows[0].querySelectorAll('td');
+          const programCell = cells[1]?.querySelector('.cell-inner');
+          const campusCell = cells[2]?.querySelector('.cell-inner');
+          
+          if (programCell) programCell.textContent = programData.firstChoice || '';
+          if (campusCell) campusCell.textContent = programData.firstCampus || '';
+        }
+        
+        // Second Choice
+        if (rows[1]) {
+          const cells = rows[1].querySelectorAll('td');
+          const programCell = cells[1]?.querySelector('.cell-inner');
+          const campusCell = cells[2]?.querySelector('.cell-inner');
+          
+          if (programCell) programCell.textContent = programData.secondChoice || '';
+          if (campusCell) campusCell.textContent = programData.secondCampus || '';
+        }
+        
+        // Third Choice
+        if (rows[2]) {
+          const cells = rows[2].querySelectorAll('td');
+          const programCell = cells[1]?.querySelector('.cell-inner');
+          const campusCell = cells[2]?.querySelector('.cell-inner');
+          
+          if (programCell) programCell.textContent = programData.thirdChoice || '';
+          if (campusCell) campusCell.textContent = programData.thirdCampus || '';
+        }
+      }
 
       // PARENTAL INFORMATION - with better null checking
       const parentalTable = document.querySelector('.form-section1 table');
