@@ -193,7 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setTextContent('landlineNumber', personalData.landlineNumber || 'N/A');
       setTextContent('email', personalData.email);
       setTextContent('contactAddress', personalData.contactAddress);
-      setTextContent('contactNumber', personalData.contactNumber);
+      setTextContent('contactMobile', personalData.contactMobile);
       setTextContent('contactRelationship', personalData.contactRelationship);
 
       // EDUCATIONAL INFORMATION
@@ -214,14 +214,42 @@ document.addEventListener("DOMContentLoaded", () => {
       setTextContent('scienceGrade11_1st', gradesData.scienceGrade11_1st);
       setTextContent('scienceGrade11_2nd', gradesData.scienceGrade11_2nd);
 
-      // PROGRAM CHOICES
-      setTextContent('firstChoice', programData.firstChoice);
-      setTextContent('firstCampus', programData.firstCampus);
-      setTextContent('secondChoice', programData.secondChoice);
-      setTextContent('secondCampus', programData.secondCampus);
-      setTextContent('thirdChoice', programData.thirdChoice);
-      setTextContent('thirdCampus', programData.thirdCampus);
-
+      // PROGRAM CHOICESS 
+      const programTable = document.querySelector('.right-column table tbody');
+      if (programTable && programData) {
+        const rows = programTable.querySelectorAll('tr');
+        
+        // First Choice
+        if (rows[0]) {
+          const cells = rows[0].querySelectorAll('td');
+          const programCell = cells[1]?.querySelector('.cell-inner');
+          const campusCell = cells[2]?.querySelector('.cell-inner');
+          
+          if (programCell) programCell.textContent = programData.firstChoice || '';
+          if (campusCell) campusCell.textContent = programData.firstCampus || '';
+        }
+        
+        // Second Choice
+        if (rows[1]) {
+          const cells = rows[1].querySelectorAll('td');
+          const programCell = cells[1]?.querySelector('.cell-inner');
+          const campusCell = cells[2]?.querySelector('.cell-inner');
+          
+          if (programCell) programCell.textContent = programData.secondChoice || '';
+          if (campusCell) campusCell.textContent = programData.secondCampus || '';
+        }
+        
+        // Third Choice
+        if (rows[2]) {
+          const cells = rows[2].querySelectorAll('td');
+          const programCell = cells[1]?.querySelector('.cell-inner');
+          const campusCell = cells[2]?.querySelector('.cell-inner');
+          
+          if (programCell) programCell.textContent = programData.thirdChoice || '';
+          if (campusCell) campusCell.textContent = programData.thirdCampus || '';
+        }
+      }
+      
       // PARENTAL INFORMATION - with better null checking
       const parentalTable = document.querySelector('.form-section1 table');
       if (parentalTable && parentalData) {
@@ -259,6 +287,41 @@ document.addEventListener("DOMContentLoaded", () => {
           if (fatherInner4) fatherInner4.textContent = parentalData.fatherContact || '';
         }
       }
+
+      // ====== SIBLING INFORMATION ======
+try {
+  const siblingTable = document.querySelector('.sibling-info-table');
+  if (siblingTable && Array.isArray(siblingData) && siblingData.length > 0) {
+    
+    // All rows except header
+    const rows = siblingTable.querySelectorAll('tr');
+    let rowIndex = 1; // start after header (row 0)
+
+    siblingData.forEach((sib, i) => {
+      if (rowIndex < rows.length) {
+        const cells = rows[rowIndex].querySelectorAll('td');
+        
+        if (cells.length >= 5) {
+          cells[0].textContent = sib.fullName || '';
+          cells[1].textContent = sib.age || '';
+          cells[2].textContent = sib.education || '';
+          cells[3].textContent = sib.school || '';
+          cells[4].textContent = sib.yearGraduated || '';
+        }
+
+        rowIndex++;
+      }
+    });
+
+    // Clear remaining rows if siblings < number of table rows
+    for (let i = rowIndex; i < rows.length; i++) {
+      const cells = rows[i].querySelectorAll('td');
+      cells.forEach(cell => cell.textContent = '');
+    }
+  }
+} catch (err) {
+  console.error("Error populating sibling data:", err);
+}
 
       // 🔥 LOAD SAVED PHOTO - FIXED VERSION
       setTimeout(() => {
