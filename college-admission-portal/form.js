@@ -511,31 +511,72 @@ if (otherInfoSection && socioEconomicData) {
       isYes ? '☑ <i>Yes</i> ☐ <i>No</i>' : '☐ <i>Yes</i> ☑ <i>No</i>';
   }
   
-  // Monthly Family Income
+
+// Monthly Family Income - FINAL FIX (Normalized comparison)
   if (socioEconomicData.monthlyIncome) {
-    const incomeSection = otherInfoSection.querySelector('strong');
-    if (incomeSection && incomeSection.textContent.includes('Estimated Monthly Family Income')) {
-      const incomeDiv = incomeSection.parentElement;
-      const incomeOptions = incomeDiv.querySelectorAll('div > div');
+    console.log('💰 Income value to find:', socioEconomicData.monthlyIncome);
+    
+    // Find the div that contains "Estimated Monthly Family Income"
+    let incomeContainer = null;
+    
+    otherInfoSection.querySelectorAll('div').forEach(div => {
+      if (div.querySelector('strong') && div.querySelector('strong').textContent.includes('Estimated Monthly Family Income')) {
+        // Get the div with margin-left:20px that comes right after
+        incomeContainer = div.querySelector('div[style*="margin-left:20px"]');
+      }
+    });
+    
+    console.log('🔍 Income container found:', !!incomeContainer);
+    
+    if (incomeContainer) {
+      // Get all direct child divs (the income options)
+      const incomeDivs = Array.from(incomeContainer.children).filter(el => el.tagName === 'DIV');
       
-      incomeOptions.forEach(option => {
-        const text = option.textContent.trim();
-        // Remove existing checkbox symbols
-        const cleanText = text.replace(/^[☐☑]\s*/, '');
+      console.log('📊 Found', incomeDivs.length, 'income options');
+      
+      let found = false;
+      
+      incomeDivs.forEach((div, index) => {
+        const text = div.textContent.trim();
+        // Remove checkbox symbol at the start
+        const cleanText = text.replace(/^[☐☑]\s*/, '').trim();
         
-        if (cleanText.includes(socioEconomicData.monthlyIncome) || 
-            socioEconomicData.monthlyIncome.includes(cleanText)) {
-          option.innerHTML = '☑ <i>' + cleanText.replace(/<\/?i>/g, '') + '</i>';
+        // Normalize whitespace AND normalize "to less than" / "less than" variations
+        const normalizedClean = cleanText
+          .replace(/\s+/g, ' ')
+          .replace(/\bto\s+less\b/g, 'less')
+          .toLowerCase();
+        
+        const normalizedIncome = socioEconomicData.monthlyIncome
+          .replace(/\s+/g, ' ')
+          .replace(/\bto\s+less\b/g, 'less')
+          .toLowerCase();
+        
+        console.log(`Option ${index}: "${normalizedClean}"`);
+        console.log(`  Comparing to: "${normalizedIncome}"`);
+        console.log(`  Match: ${normalizedClean === normalizedIncome}`);
+        
+        // Use textContent for safer text assignment
+        if (normalizedClean === normalizedIncome) {
+          console.log('✅ MATCHED!', cleanText);
+          div.textContent = '☑ ' + cleanText;
+          found = true;
         } else {
-          option.innerHTML = '☐ <i>' + cleanText.replace(/<\/?i>/g, '') + '</i>';
+          div.textContent = '☐ ' + cleanText;
         }
       });
+      
+      if (!found) {
+        console.warn('⚠️ No matching income found');
+        console.warn('Stored value (normalized):', normalizedIncome);
+      }
+    } else {
+      console.log('❌ Income container not found');
     }
   }
+
+  console.log('✅ Socio-economic data populated in form preview');
 }
-
-console.log('✅ Socio-economic data populated in form preview');
-
 
       // 🔥 LOAD SAVED PHOTO - FIXED VERSION
       setTimeout(() => {
