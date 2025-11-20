@@ -484,6 +484,28 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+
+  //  SCHOOL TYPE CODE  
+  const schoolTypeRadios = document.querySelectorAll('input[name="schoolType"]');
+
+// Load saved school type on page load
+const savedSchoolType = localStorage.getItem('edu-schoolType');
+schoolTypeRadios.forEach(radio => {
+  if (savedSchoolType && radio.value === savedSchoolType) {
+    radio.checked = true;
+  }
+  
+  // Save school type when changed
+  radio.addEventListener('change', () => {
+    if (radio.checked) {
+      localStorage.setItem('edu-schoolType', radio.value);
+      console.log('✅ School type saved:', radio.value);
+    }
+  });
+});
+  //  END OF SCHOOL TYPE CODE 
+
+
   const shsInputs = document.querySelectorAll('.grades-table2 input[type="number"]');
   const shsSelects = document.querySelectorAll('.grades-table2 select');
 

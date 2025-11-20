@@ -102,6 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const transferredYear = localStorage.getItem('field_transferredYear') || '';
       const bsuGraduate = localStorage.getItem('field_bsuGraduate') || '';
       const bsuSchool = localStorage.getItem('field_bsuSchool') || '';
+      const schoolType = localStorage.getItem('edu-schoolType') || 'public,private';
 
       // GET AAP DATA
       const aapSelection = localStorage.getItem('field_aap') || '';
@@ -122,30 +123,94 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // POPULATE TRANSFER STATUS IN EDUCATIONAL INFORMATION
-      const educationalTables = document.querySelectorAll('.form-section table');
-      if (educationalTables.length > 0) {
-        const educationalTable = educationalTables[0];
-        const allRows = educationalTable.querySelectorAll('tr');
+const allTables = document.querySelectorAll('table');
+
+allTables.forEach(table => {
+  const allRows = table.querySelectorAll('tr');
+  
+  allRows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    
+    cells.forEach(cell => {
+      // Check if this cell contains the transfer question
+      if (cell.textContent.includes('Have you ever transferred')) {
+        console.log('Found transfer cell:', cell.textContent); // Debug log
         
-        allRows.forEach(row => {
-          const cell = row.querySelector('td[colspan="2"]');
-          if (cell && cell.innerHTML.includes('Have you ever transferred')) {
-            if (transferred === 'yes') {
-              cell.innerHTML = `
-                <strong>Have you ever transferred during your Senior Your High School?</strong><br>
-                <span style="margin-left:20px;">☑ <i>Yes, previously from ${transferredFrom || '___'} (Year: ${transferredYear || '___'})</i></span>
-                <span style="margin-left:20px;">☐ <i>No</i></span>
-              `;
-            } else if (transferred === 'no') {
-              cell.innerHTML = `
-                <strong>Have you ever transferred during your Senior Your High School?</strong><br>
-                <span style="margin-left:20px;">☐ <i>Yes, previously from</i></span>
-                <span style="margin-left:20px;">☑ <i>No</i></span>
-              `;
-            }
-          }
-        });
+        if (transferred === 'yes') {
+          cell.innerHTML = `
+            <strong>Have you ever transferred during your Senior Your High School?</strong><br>
+            <span style="margin-left:20px;">☑ <i>Yes</i></span>
+            <span style="margin-left:20px;">☐ <i>No</i></span>
+          `;
+        } else if (transferred === 'no') {
+          cell.innerHTML = `
+            <strong>Have you ever transferred during your Senior Your High School?</strong><br>
+            <span style="margin-left:20px;">☐ <i>Yes</i></span>
+            <span style="margin-left:20px;">☑ <i>No</i></span>
+          `;
+        }
       }
+    });
+  });
+
+// POPULATE TRANSFER STATUS AND TYPE OF SCHOOL
+const allTables = document.querySelectorAll('table');
+const schoolType = localStorage.getItem('edu-schoolType') || 'public'; // Changed from 'field_schoolType'
+
+console.log('🔍 Looking for Type of School...');
+console.log('📚 School type from storage:', schoolType);
+
+let transferUpdated = false;
+let schoolTypeUpdated = false;
+
+allTables.forEach(table => {
+  const allRows = table.querySelectorAll('tr');
+  
+  allRows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    
+    cells.forEach(cell => {
+    // Handle Transfer Status (only once)
+    if (!transferUpdated && cell.textContent.includes('Have you ever transferred')) {
+      console.log('✅ Found transfer cell');
+      
+      if (transferred === 'yes') {
+        cell.innerHTML = `
+          <strong>Have you ever transferred during your Senior Your High School?</strong><br>
+          <span style="margin-left:20px;">☑ <i>Yes, previously from ${transferredFrom || '___'} (Year: ${transferredYear || '___'})</i></span>
+          <span style="margin-left:20px;">☐ <i>No</i></span>
+        `;
+      } else if (transferred === 'no') {
+        cell.innerHTML = `
+          <strong>Have you ever transferred during your Senior Your High School?</strong><br>
+          <span style="margin-left:20px;">☐ <i>Yes, previously from</i></span>
+          <span style="margin-left:20px;">☑ <i>No</i></span>
+        `;
+      }
+      transferUpdated = true;
+    }
+    
+    // Handle Type of School (only once)
+    if (!schoolTypeUpdated && cell.textContent.includes('Type of School')) {
+        console.log('✅ Found Type of School cell');
+        console.log('📚 Populating with:', schoolType);
+        
+        cell.innerHTML = `
+          <strong>Type of School</strong><br>
+          <span style="margin-left:20px;">${schoolType === 'public' ? '☑' : '☐'} <i>Public</i></span>
+          <span style="margin-left:20px;">${schoolType === 'suc' ? '☑' : '☐'} <i>SUC</i></span><br>
+          <span style="margin-left:20px;">${schoolType === 'private' ? '☑' : '☐'} <i>Private</i></span>
+          <span style="margin-left:20px;">${schoolType === 'lcu' ? '☑' : '☐'} <i>LCU</i></span>
+        `;
+        schoolTypeUpdated = true;
+      }
+    });
+  });
+});
+
+console.log('✅ Transfer updated:', transferUpdated);
+console.log('✅ School type updated:', schoolTypeUpdated);
+});
 
       // POPULATE AAP CHECKBOXES
       const aapCheckboxes = document.querySelectorAll('.instructions-right .checkbox-item');
