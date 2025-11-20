@@ -366,13 +366,18 @@ if (parentalTable && parentalData) {
 }
       
 
-      // ====== SIBLING INFORMATION ======
+  // ====== SIBLING INFORMATION ======
 try {
+  console.log('🔍 Sibling data from storage:', siblingData);
+  console.log('🔍 Is array?', Array.isArray(siblingData));
+  
   const siblingTable = document.querySelector('.sibling-info-table');
+  console.log('🔍 Sibling table found:', siblingTable);
+  
+  // Check if siblingData exists and is an array with items
   if (siblingTable && Array.isArray(siblingData) && siblingData.length > 0) {
-    
-    // All rows except header
     const rows = siblingTable.querySelectorAll('tr');
+    console.log('🔍 Total sibling table rows:', rows.length);
     let rowIndex = 1; // start after header (row 0)
 
     siblingData.forEach((sib, i) => {
@@ -386,19 +391,31 @@ try {
           cells[3].textContent = sib.school || '';
           cells[4].textContent = sib.yearGraduated || '';
         }
-
         rowIndex++;
       }
     });
 
-    // Clear remaining rows if siblings < number of table rows
+    // Clear remaining rows
     for (let i = rowIndex; i < rows.length; i++) {
       const cells = rows[i].querySelectorAll('td');
       cells.forEach(cell => cell.textContent = '');
     }
+    
+    console.log('✅ Sibling data populated successfully');
+  } else {
+    console.log('ℹ️ No siblings to display - clearing all data rows');
+    
+    // Clear all sibling data rows (leave header intact)
+    if (siblingTable) {
+      const rows = siblingTable.querySelectorAll('tr');
+      for (let i = 1; i < rows.length; i++) {  // Start from 1 to skip header
+        const cells = rows[i].querySelectorAll('td');
+        cells.forEach(cell => cell.textContent = '');
+      }
+    }
   }
 } catch (err) {
-  console.error("Error populating sibling data:", err);
+  console.error("❌ Error populating sibling data:", err);
 }
 
       // 🔥 LOAD SAVED PHOTO - FIXED VERSION

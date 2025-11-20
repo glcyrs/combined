@@ -205,12 +205,14 @@ document.getElementById("hasSiblingsYes").addEventListener("change", () => {
   document.getElementById("addSiblingBox").style.display = "block";
   document.getElementById("summaryHeader").style.display = "block";
   document.getElementById("summaryBox").style.display = "block";
+  saveSiblingsData();
 });
 document.getElementById("hasSiblingsNo").addEventListener("change", () => {
   document.getElementById("addSiblingHeader").style.display = "none";
   document.getElementById("addSiblingBox").style.display = "none";
   document.getElementById("summaryHeader").style.display = "block";
   document.getElementById("summaryBox").style.display = "block";
+  saveSiblingsData();
 });
 
 function addSiblingToSummary() {
@@ -272,6 +274,8 @@ function addSiblingToSummary() {
   yearGradCell.innerText = '';
 }
 
+  saveSiblingsData();
+
 function removeSummaryRow(button) {
   const row = button.parentNode.parentNode;
   const summaryTable = document.querySelector('.siblings-summary-table');
@@ -289,6 +293,77 @@ function removeSummaryRow(button) {
     cell.innerText = '**No siblings**';
   }
 }
+
+ saveSiblingsData();
+
+// ⭐ ADD THIS NEW FUNCTION HERE ⭐
+function saveSiblingsData() {
+  const hasSiblingsYes = document.getElementById("hasSiblingsYes").checked;
+  
+  if (!hasSiblingsYes) {
+    localStorage.setItem('siblingData', JSON.stringify([]));
+    console.log('✅ Saved: No siblings');
+    return;
+  }
+  
+  const summaryTable = document.querySelector('.siblings-summary-table');
+  const siblings = [];
+  
+  for (let i = 1; i < summaryTable.rows.length; i++) {
+    const row = summaryTable.rows[i];
+    if (row.querySelector('.no-siblings-text')) continue;
+    
+    const cells = row.cells;
+    siblings.push({
+      fullName: cells[1].innerText.trim(),
+      age: cells[2].innerText.trim(),
+      education: cells[3].innerText.trim(),
+      school: cells[4].innerText.trim(),
+      yearGraduated: cells[5].innerText.trim()
+    });
+  }
+  
+  localStorage.setItem('siblingData', JSON.stringify(siblings));
+  console.log('✅ Saved siblings data:', siblings);
+}
+
+// ================= SAVE SIBLINGS TO LOCALSTORAGE =================
+function saveSiblingsData() {
+  const hasSiblingsYes = document.getElementById("hasSiblingsYes").checked;
+  
+  if (!hasSiblingsYes) {
+    // No siblings - save empty array
+    localStorage.setItem('siblingData', JSON.stringify([]));
+    console.log('✅ Saved: No siblings');
+    return;
+  }
+  
+  const summaryTable = document.querySelector('.siblings-summary-table');
+  const siblings = [];
+  
+  // Start from row 1 to skip header (row 0)
+  for (let i = 1; i < summaryTable.rows.length; i++) {
+    const row = summaryTable.rows[i];
+    
+    // Skip the "no siblings" message row
+    if (row.querySelector('.no-siblings-text')) continue;
+    
+    const cells = row.cells;
+    
+    siblings.push({
+      fullName: cells[1].innerText.trim(),
+      age: cells[2].innerText.trim(),
+      education: cells[3].innerText.trim(),
+      school: cells[4].innerText.trim(),
+      yearGraduated: cells[5].innerText.trim()
+    });
+  }
+  
+  localStorage.setItem('siblingData', JSON.stringify(siblings));
+  console.log('✅ Saved siblings data:', siblings);
+}
+
+
 
 // ================= PH ADDRESS CASCADING =================
 (() => {
@@ -894,6 +969,8 @@ localStorage.setItem('parentalData', JSON.stringify(parentalData));
 console.log('✅ Personal data saved:', personalData);
 console.log('✅ Parental data saved:', parentalData);
 console.log('✅ Parental data in storage:', localStorage.getItem('parentalData'));
+
+saveSiblingsData();
 
 // Navigate to next page
 window.location.href = "educattach.html";
