@@ -418,6 +418,125 @@ try {
   console.error("❌ Error populating sibling data:", err);
 }
 
+
+// ====== SOCIO-ECONOMIC / OTHER INFORMATION ======
+const socioEconomicData = JSON.parse(localStorage.getItem('socioEconomicData') || '{}');
+console.log('📦 Socio-economic data loaded:', socioEconomicData);
+
+const otherInfoSection = document.querySelector('.other-info-section');
+
+if (otherInfoSection && socioEconomicData) {
+  const checkboxLines = otherInfoSection.querySelectorAll('.checkbox-line');
+  
+  // First member in family (line 0)
+  if (checkboxLines[0] && socioEconomicData.firstMember) {
+    const isYes = socioEconomicData.firstMember === "Yes";
+    checkboxLines[0].querySelector('.other-check').innerHTML = 
+      isYes ? '☑ <i>Yes</i> ☐ <i>No</i>' : '☐ <i>Yes</i> ☑ <i>No</i>';
+  }
+  
+  // 4Ps Program (line 1)
+  if (checkboxLines[1] && socioEconomicData.fourPs) {
+    const isYes = socioEconomicData.fourPs === "Yes";
+    checkboxLines[1].querySelector('.other-check').innerHTML = 
+      isYes ? '☑ <i>Yes</i> ☐ <i>No</i>' : '☐ <i>Yes</i> ☑ <i>No</i>';
+  }
+  
+  // Indigenous group (line 2)
+  if (checkboxLines[2]) {
+    const isYes = socioEconomicData.indigenous === "Yes";
+    let indigenousText = isYes ? '☑ <i>Yes</i> ☐ <i>No</i>' : '☐ <i>Yes</i> ☑ <i>No</i>';
+    
+    if (isYes) {
+      const group = socioEconomicData.indigenousGroup === "Others" 
+        ? socioEconomicData.indigenousOther 
+        : socioEconomicData.indigenousGroup;
+      indigenousText += ` &nbsp;&nbsp; If yes, please identify: <u>${group || 'N/A'}</u>`;
+    } else {
+      indigenousText += ` &nbsp;&nbsp; If yes, please identify: <u>N/A</u>`;
+    }
+    
+    checkboxLines[2].querySelector('.other-check').innerHTML = indigenousText;
+  }
+  
+  // LGBTQIA+ (line 3)
+  if (checkboxLines[3] && socioEconomicData.lgbtqia) {
+    const isYes = socioEconomicData.lgbtqia === "Yes";
+    const isPrefer = socioEconomicData.lgbtqia === "Prefer not to say";
+    
+    if (isYes) {
+      checkboxLines[3].querySelector('.other-check').innerHTML = 
+        '☑ <i>Yes</i> ☐ <i>No</i> ☐ <i>Prefer not to say</i>';
+    } else if (isPrefer) {
+      checkboxLines[3].querySelector('.other-check').innerHTML = 
+        '☐ <i>Yes</i> ☐ <i>No</i> ☑ <i>Prefer not to say</i>';
+    } else {
+      checkboxLines[3].querySelector('.other-check').innerHTML = 
+        '☐ <i>Yes</i> ☑ <i>No</i> ☐ <i>Prefer not to say</i>';
+    }
+  }
+  
+  // Internally Displaced Person (line 4)
+  if (checkboxLines[4]) {
+    const isYes = socioEconomicData.idp === "Yes";
+    let idpText = isYes ? '☑ <i>Yes</i> ☐ <i>No</i>' : '☐ <i>Yes</i> ☑ <i>No</i>';
+    
+    if (isYes && socioEconomicData.idpDetails) {
+      idpText += ` &nbsp;&nbsp; If yes, please provide some details: <u>${socioEconomicData.idpDetails}</u>`;
+    } else {
+      idpText += ` &nbsp;&nbsp; If yes, please provide some details: <u>N/A</u>`;
+    }
+    
+    checkboxLines[4].querySelector('.other-check').innerHTML = idpText;
+  }
+  
+  // Person with Disability (line 5)
+  if (checkboxLines[5] && socioEconomicData.pwd) {
+    const isYes = socioEconomicData.pwd === "Yes";
+    let pwdText = isYes ? '☑ <i>Yes</i> ☐ <i>No</i>' : '☐ <i>Yes</i> ☑ <i>No</i>';
+    
+    if (isYes && socioEconomicData.disabilities && socioEconomicData.disabilities.length > 0) {
+      pwdText += ` &nbsp;&nbsp; If yes, please identify: <u>${socioEconomicData.disabilities.join(', ')}</u>`;
+    } else if (isYes) {
+      pwdText += ` &nbsp;&nbsp; If yes, please identify: <u>N/A</u>`;
+    }
+    
+    checkboxLines[5].querySelector('.other-check').innerHTML = pwdText;
+  }
+  
+  // Solo Parent (line 6)
+  if (checkboxLines[6] && socioEconomicData.soloParent) {
+    const isYes = socioEconomicData.soloParent === "Yes";
+    checkboxLines[6].querySelector('.other-check').innerHTML = 
+      isYes ? '☑ <i>Yes</i> ☐ <i>No</i>' : '☐ <i>Yes</i> ☑ <i>No</i>';
+  }
+  
+  // Monthly Family Income
+  if (socioEconomicData.monthlyIncome) {
+    const incomeSection = otherInfoSection.querySelector('strong');
+    if (incomeSection && incomeSection.textContent.includes('Estimated Monthly Family Income')) {
+      const incomeDiv = incomeSection.parentElement;
+      const incomeOptions = incomeDiv.querySelectorAll('div > div');
+      
+      incomeOptions.forEach(option => {
+        const text = option.textContent.trim();
+        // Remove existing checkbox symbols
+        const cleanText = text.replace(/^[☐☑]\s*/, '');
+        
+        if (cleanText.includes(socioEconomicData.monthlyIncome) || 
+            socioEconomicData.monthlyIncome.includes(cleanText)) {
+          option.innerHTML = '☑ <i>' + cleanText.replace(/<\/?i>/g, '') + '</i>';
+        } else {
+          option.innerHTML = '☐ <i>' + cleanText.replace(/<\/?i>/g, '') + '</i>';
+        }
+      });
+    }
+  }
+}
+
+console.log('✅ Socio-economic data populated in form preview');
+
+
       // 🔥 LOAD SAVED PHOTO - FIXED VERSION
       setTimeout(() => {
         const savedPhoto = localStorage.getItem("savedPhoto");
