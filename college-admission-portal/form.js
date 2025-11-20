@@ -91,6 +91,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const parentalData = JSON.parse(localStorage.getItem('parentalData') || '{}');
       const siblingData = JSON.parse(localStorage.getItem('siblingData') || '{}');
 
+      console.log('📦 Parental data loaded:', parentalData);
+
       // GET CONFIRMATION PAGE DATA
       const academicStatus = localStorage.getItem('field_academicStatus') || '';
       const alreadyEnrolled = localStorage.getItem('field_alreadyEnrolled') || '';
@@ -287,43 +289,82 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       
-      // PARENTAL INFORMATION - with better null checking
-      const parentalTable = document.querySelector('.form-section1 table');
-      if (parentalTable && parentalData) {
-        const rows = parentalTable.querySelectorAll('tr');
-        
-        // Mother's info
-        if (rows[0]) {
-          const cells = rows[0].querySelectorAll('td');
-          const motherInner0 = cells[0]?.querySelector('.cell-inner');
-          const motherInner1 = cells[1]?.querySelector('.cell-inner');
-          const motherInner2 = cells[2]?.querySelector('.cell-inner');
-          const motherInner3 = cells[3]?.querySelector('.cell-inner');
-          const motherInner4 = cells[4]?.querySelector('.cell-inner');
-          
-          if (motherInner0) motherInner0.textContent = parentalData.motherName || '';
-          if (motherInner1) motherInner1.textContent = parentalData.motherAge || '';
-          if (motherInner2) motherInner2.textContent = parentalData.motherOccupation || '';
-          if (motherInner3) motherInner3.textContent = parentalData.motherIncome || '';
-          if (motherInner4) motherInner4.textContent = parentalData.motherContact || '';
-        }
-        
-        // Father's info
-        if (rows[2]) {
-          const cells = rows[2].querySelectorAll('td');
-          const fatherInner0 = cells[0]?.querySelector('.cell-inner');
-          const fatherInner1 = cells[1]?.querySelector('.cell-inner');
-          const fatherInner2 = cells[2]?.querySelector('.cell-inner');
-          const fatherInner3 = cells[3]?.querySelector('.cell-inner');
-          const fatherInner4 = cells[4]?.querySelector('.cell-inner');
-          
-          if (fatherInner0) fatherInner0.textContent = parentalData.fatherName || '';
-          if (fatherInner1) fatherInner1.textContent = parentalData.fatherAge || '';
-          if (fatherInner2) fatherInner2.textContent = parentalData.fatherOccupation || '';
-          if (fatherInner3) fatherInner3.textContent = parentalData.fatherIncome || '';
-          if (fatherInner4) fatherInner4.textContent = parentalData.fatherContact || '';
-        }
-      }
+    // PARENTAL INFORMATION 
+// Find the parental section first, then get its table
+const parentalSection = document.querySelector('.section-title');
+let parentalTable = null;
+
+// Loop through all section titles to find "PARENTAL INFORMATION"
+document.querySelectorAll('.section-title').forEach(title => {
+  if (title.textContent.includes('PARENTAL INFORMATION')) {
+    // Get the next sibling which should be the form-section1
+    parentalTable = title.nextElementSibling?.querySelector('table');
+  }
+});
+
+console.log('🔍 Parental table found:', parentalTable);
+
+if (parentalTable && parentalData) {
+  const rows = parentalTable.querySelectorAll('tr');
+  console.log('🔍 Found rows:', rows.length);
+  
+  // MOTHER'S INFO (Row 0)
+  if (rows[0]) {
+    const cells = rows[0].querySelectorAll('td');
+    console.log('🔍 Mother row cells:', cells.length);
+    
+    // Combine mother's name
+    const motherFullName = [
+      parentalData.motherFirst,
+      parentalData.motherMiddle,
+      parentalData.motherLast
+    ].filter(Boolean).join(' ').toUpperCase();
+    
+    console.log('👩 Mother name:', motherFullName);
+    
+    const motherInner0 = cells[0]?.querySelector('.cell-inner');
+    const motherInner1 = cells[1]?.querySelector('.cell-inner');
+    const motherInner2 = cells[2]?.querySelector('.cell-inner');
+    const motherInner3 = cells[3]?.querySelector('.cell-inner');
+    const motherInner4 = cells[4]?.querySelector('.cell-inner');
+    
+    if (motherInner0) motherInner0.textContent = motherFullName || '';
+    if (motherInner1) motherInner1.textContent = parentalData.motherAge || '';
+    if (motherInner2) motherInner2.textContent = parentalData.motherOccupation || '';
+    if (motherInner3) motherInner3.textContent = '0';
+    if (motherInner4) motherInner4.textContent = parentalData.motherContact || '';
+  }
+  
+  // FATHER'S INFO (Row 2)
+  if (rows[2]) {
+    const cells = rows[2].querySelectorAll('td');
+    console.log('🔍 Father row cells:', cells.length);
+    
+    // Combine father's name
+    const fatherFullName = [
+      parentalData.fatherFirst,
+      parentalData.fatherMiddle,
+      parentalData.fatherLast
+    ].filter(Boolean).join(' ').toUpperCase();
+    
+    console.log('👨 Father name:', fatherFullName);
+    
+    const fatherInner0 = cells[0]?.querySelector('.cell-inner');
+    const fatherInner1 = cells[1]?.querySelector('.cell-inner');
+    const fatherInner2 = cells[2]?.querySelector('.cell-inner');
+    const fatherInner3 = cells[3]?.querySelector('.cell-inner');
+    const fatherInner4 = cells[4]?.querySelector('.cell-inner');
+    
+    if (fatherInner0) fatherInner0.textContent = fatherFullName || '';
+    if (fatherInner1) fatherInner1.textContent = parentalData.fatherAge || '';
+    if (fatherInner2) fatherInner2.textContent = parentalData.fatherOccupation || '';
+    if (fatherInner3) fatherInner3.textContent = '0';
+    if (fatherInner4) fatherInner4.textContent = parentalData.fatherContact || '';
+  }
+} else {
+  console.error('❌ Table or data not found!');
+}
+      
 
       // ====== SIBLING INFORMATION ======
 try {
@@ -382,7 +423,8 @@ try {
         }
       }, 100);
 
-      console.log('Form populated successfully from localStorage');
+   console.log('✅ Form populated successfully from localStorage');  // ADD THIS LINE
+
     } catch (error) {
       console.error('Error populating form:', error);
     }
@@ -394,3 +436,4 @@ try {
   // ====== Initial render ======
   updateSteps();
 });
+

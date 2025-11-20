@@ -851,54 +851,52 @@ if (middleNameValue === "") {
   }
 
   const personalData = {
-      surname: document.getElementById('lastName')?.value.toUpperCase() || '',
-      firstName: document.getElementById('firstName')?.value.toUpperCase() || '',
-      middleName: document.getElementById('middleName')?.value || '',
-      address: fullAddress,
-      zipCode: document.getElementById('zipCode')?.value || '',
-      dateOfBirth: birthdateStr,
-      sex: sex?.value.toUpperCase() || '',
-      age: calculatedAge,
-      religion: document.getElementById('religion')?.value || '',
-      nationality: nationality.value === 'Other' ? otherNationality.value.toUpperCase() : nationality.value.toUpperCase(),
-      mobileNumber: document.getElementById('mobile')?.value || '',
-      landlineNumber: document.getElementById('telephone')?.value || 'N/A',
-      email: document.getElementById('email')?.value || '',
-      contactPerson: document.getElementById('contactName')?.value.toUpperCase() || '',
-      contactAddress: document.getElementById('contactAddress')?.value.toUpperCase() || '',
-      contactMobile: document.getElementById('contactMobile')?.value || '',
-      contactRelationship: document.getElementById('contactRelationship')?.value || ''
-  };
-
-  const parentsTable = document.getElementById('parentsBox');
-  const parentRows = parentsTable.querySelectorAll('tr');
-  
-  // Father row = row 2
-  // Mother row = row 4
-
-const parentalData = {
-        fatherLast:        getValue("fatherLast"),
-        fatherFirst:       getValue("fatherFirst"),
-        fatherMiddle:      getValue("fatherMiddle"),
-        fatherAge:         getValue("fatherAge"),
-        fatherOccupation:  getValue("fatherOccupation"),
-        fatherContact:     getValue("fatherContact"),
-
-        motherLast:        getValue("motherLast"),
-        motherFirst:       getValue("motherFirst"),
-        motherMiddle:      getValue("motherMiddle"),
-        motherAge:         getValue("motherAge"),
-        motherOccupation:  getValue("motherOccupation"),
-        motherContact:     getValue("motherContact"),
+    surname: document.getElementById('lastName')?.value.toUpperCase() || '',
+    firstName: document.getElementById('firstName')?.value.toUpperCase() || '',
+    middleName: document.getElementById('middleName')?.value || '',
+    address: fullAddress,
+    zipCode: document.getElementById('zipCode')?.value || '',
+    dateOfBirth: birthdateStr,
+    sex: sex?.value.toUpperCase() || '',
+    age: calculatedAge,
+    religion: document.getElementById('religion')?.value || '',
+    nationality: nationality.value === 'Other' ? otherNationality.value.toUpperCase() : nationality.value.toUpperCase(),
+    mobileNumber: document.getElementById('mobile')?.value || '',
+    landlineNumber: document.getElementById('telephone')?.value || 'N/A',
+    email: document.getElementById('email')?.value || '',
+    contactPerson: document.getElementById('contactName')?.value.toUpperCase() || '',
+    contactAddress: document.getElementById('contactAddress')?.value.toUpperCase() || '',
+    contactMobile: document.getElementById('contactMobile')?.value || '',
+    contactRelationship: document.getElementById('contactRelationship')?.value || ''
 };
 
-  localStorage.setItem('personalData', JSON.stringify(personalData));
-  localStorage.setItem('parentalData', JSON.stringify(parentalData));
+// Get parental data from the contenteditable cells
+const parentalData = {
+    fatherLast: getValue("fatherLast"),
+    fatherFirst: getValue("fatherFirst"),
+    fatherMiddle: getValue("fatherMiddle"),
+    fatherAge: getValue("fatherAge"),
+    fatherOccupation: getValue("fatherOccupation"),
+    fatherContact: getValue("fatherContact"),
 
-  console.log('✅ Personal data saved:', personalData);
-  console.log('✅ Parental data saved:', parentalData);
+    motherLast: getValue("motherLast"),
+    motherFirst: getValue("motherFirst"),
+    motherMiddle: getValue("motherMiddle"),
+    motherAge: getValue("motherAge"),
+    motherOccupation: getValue("motherOccupation"),
+    motherContact: getValue("motherContact"),
+};
 
-  window.location.href = "educattach.html";
+// Save to localStorage
+localStorage.setItem('personalData', JSON.stringify(personalData));
+localStorage.setItem('parentalData', JSON.stringify(parentalData));
+
+console.log('✅ Personal data saved:', personalData);
+console.log('✅ Parental data saved:', parentalData);
+console.log('✅ Parental data in storage:', localStorage.getItem('parentalData'));
+
+// Navigate to next page
+window.location.href = "educattach.html";
 
 // =============================
 // AUTO-LOAD SAVED VALUES
