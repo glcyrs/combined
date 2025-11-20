@@ -34,47 +34,74 @@ let maxUnlockedStep = (storedMax !== null && !isNaN(storedMax)) ? storedMax : cu
 document.addEventListener("DOMContentLoaded", () => {
   const steps = document.querySelectorAll(".step");
 
-  function updateSteps() {
+  function updateStepsUI() {
     steps.forEach((step, index) => {
-      step.classList.toggle("active", index === currentStep);
+      const circle = step.querySelector("span"); // step number circle
+      const icon = step.querySelector("i");      // optional icon
+      const label = step.querySelector("p");     // step label
+      const isActive = index === currentStep;
+
+      // Active step
+      step.classList.toggle("active", isActive);
+
       if (index <= maxUnlockedStep) {
+        // Unlocked step
         step.classList.add("clickable");
         step.style.pointerEvents = "auto";
-        step.style.opacity = "1";
+        step.style.cursor = "pointer";
+
+        if (icon) icon.style.opacity = "1";
+        if (label) label.style.opacity = "1";
+        if (circle) circle.style.borderColor = isActive ? "#1a9737" : "#ccc";
+
+        // Click handler
+        step.onclick = () => {
+          if (index > maxUnlockedStep) return;
+
+          currentStep = index;
+
+          // Unlock next step if clicking last unlocked
+          if (currentStep === maxUnlockedStep && maxUnlockedStep < steps.length - 1) {
+            maxUnlockedStep++;
+          }
+
+          localStorage.setItem("currentStep", currentStep);
+          localStorage.setItem("maxUnlockedStep", maxUnlockedStep);
+
+          updateStepsUI();
+
+          if (typeof showSection === "function") showSection(currentStep);
+
+          // Navigate to page
+          switch (index) {
+            case 0: window.location.href = "index.html"; break;
+            case 1: window.location.href = "readfirst.html"; break;
+            case 2: window.location.href = "confirmation.html"; break;
+            case 3: window.location.href = "aap.html"; break;
+            case 4: window.location.href = "personal.html"; break;
+            case 5: window.location.href = "educattach.html"; break;
+            case 6: window.location.href = "programs.html"; break;
+            case 7: window.location.href = "form.html"; break;
+            case 8: window.location.href = "submit.html"; break;
+          }
+        };
       } else {
+        // Locked step
         step.classList.remove("clickable");
         step.style.pointerEvents = "none";
-        step.style.opacity = "1";
+        step.style.cursor = "default";
+
+        if (circle) circle.style.borderColor = "#ddd";
+        if (icon) icon.style.opacity = "0.4";
+        if (label) label.style.opacity = "0.5";
+
+        step.onclick = null; // remove click
       }
     });
-    localStorage.setItem("currentStep", currentStep);
-    localStorage.setItem("maxUnlockedStep", maxUnlockedStep);
   }
 
-  steps.forEach((step, index) => {
-    step.addEventListener("click", () => {
-      if (index > maxUnlockedStep) return;
-      currentStep = index;
-      if (currentStep === maxUnlockedStep && maxUnlockedStep < steps.length - 1) {
-        maxUnlockedStep++;
-      }
-      updateSteps();
-      if (typeof showSection === "function") showSection(currentStep);
-      switch (index) {
-        case 0: window.location.href = "index.html"; break;
-        case 1: window.location.href = "readfirst.html"; break;
-        case 2: window.location.href = "confirmation.html"; break;
-        case 3: window.location.href = "aap.html"; break;
-        case 4: window.location.href = "personal.html"; break;
-        case 5: window.location.href = "educattach.html"; break;
-        case 6: window.location.href = "programs.html"; break;
-        case 7: window.location.href = "form.html"; break;
-        case 8: window.location.href = "submit.html"; break;
-      }
-    });
-  });
-
-  updateSteps();
+  // Initial UI render
+  updateStepsUI();
 });
 
 // =====================================================

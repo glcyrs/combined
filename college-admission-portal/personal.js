@@ -1267,21 +1267,50 @@ if (currentStep > maxUnlockedStep) {
 }
 
 const steps = document.querySelectorAll(".step");
+function updateStepsUI() {
+  steps.forEach((step, index) => {
+    const circle = step.querySelector("span"); // step number circle
+    const icon = step.querySelector("i");      // optional icon
+    const label = step.querySelector("p");     // step label
+    const isActive = index === currentStep;
 
-steps.forEach((step, index) => {
-  if (index === currentStep) {
-    step.classList.add("active");
-  }
-  if (index <= maxUnlockedStep) {
-    step.classList.add("unlocked");
-    step.style.cursor = "pointer";
-    step.querySelectorAll("*").forEach(el => el.style.pointerEvents = "none");
-    step.addEventListener("click", () => {
-      localStorage.setItem("maxUnlockedStep", Math.max(maxUnlockedStep, index));
-      window.location.href = pageMap[index];
-    });
-  }
-});
+    // Active step
+    step.classList.toggle("active", isActive);
+
+    if (index <= maxUnlockedStep) {
+      // Unlocked step
+      step.classList.add("clickable");
+      step.style.pointerEvents = "auto";
+      step.style.cursor = "pointer";
+
+      if (icon) icon.style.opacity = "1";
+      if (label) label.style.opacity = "1";
+      if (circle) circle.style.borderColor = isActive ? "#1a9737" : "#ccc";
+
+      // click handler
+      step.onclick = () => {
+        maxUnlockedStep = Math.max(maxUnlockedStep, index);
+        localStorage.setItem("maxUnlockedStep", maxUnlockedStep);
+        localStorage.setItem("lastVisitedStep", index);
+        const target = pageMap[index] || pageMap[0];
+        setTimeout(() => window.location.href = target, 50);
+      };
+    } else {
+      // Locked step
+      step.classList.remove("clickable");
+      step.style.pointerEvents = "none";
+      step.style.cursor = "default";
+
+      if (circle) circle.style.borderColor = "#ddd";
+      if (icon) icon.style.opacity = "0.4";
+      if (label) label.style.opacity = "0.5";
+
+      step.onclick = null; // remove click
+    }
+  });
+}
+
+updateStepsUI();
 
 function saveIncomeRadio() {
   const selected = document.querySelector('input[name="income"]:checked');
