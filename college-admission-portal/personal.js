@@ -56,25 +56,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (notif) notif.style.display = 'none';
   }
 
-  document.querySelectorAll('input[type="radio"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-      const name = radio.name;  
-      const container = document.getElementById(`${name}Field`) || radio.closest('.radio-group');
-      if (container) container.classList.remove('error', 'error-radio-group');
-      const notif = document.getElementById('error-notif');
-      if (notif) notif.style.display = 'none';
-    });
+ // Save all radio buttons with consistent "Yes"/"No" values
+document.querySelectorAll('input[type="radio"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    const name = this.name;
+    const value = this.value;
+    
+    // Store the actual value (should be "Yes" or "No" for most)
+    localStorage.setItem(name, value);
+    
+    console.log(`✅ Saved ${name}: ${value}`);
+    
+    // Immediately save socio-economic data when any radio changes
+    if (['first_member', '4ps', 'indigenous', 'lgbtqia', 'idp', 'pwd', 'solo_parent', 'income'].includes(name)) {
+      saveSocioEconomicData();
+    }
   });
-
-  const parentCells = document.querySelectorAll('#parentsBox td[contenteditable="true"]');
-  parentCells.forEach(cell => {
-    cell.addEventListener('input', () => {
-      const parentsBox = document.getElementById('parentsBox');
-      let empty = false;
-      parentCells.forEach(c => { if (!c.textContent.trim()) empty = true; });
-      if (!empty) parentsBox.classList.remove('error');
-    });
-  });
+});
 
   const siblingInputs = document.querySelectorAll('#siblingsTable td[contenteditable="true"], #siblingsTable select');
   siblingInputs.forEach(el => {
@@ -205,12 +203,14 @@ document.getElementById("hasSiblingsYes").addEventListener("change", () => {
   document.getElementById("addSiblingBox").style.display = "block";
   document.getElementById("summaryHeader").style.display = "block";
   document.getElementById("summaryBox").style.display = "block";
+  saveSiblingsData();
 });
 document.getElementById("hasSiblingsNo").addEventListener("change", () => {
   document.getElementById("addSiblingHeader").style.display = "none";
   document.getElementById("addSiblingBox").style.display = "none";
   document.getElementById("summaryHeader").style.display = "block";
   document.getElementById("summaryBox").style.display = "block";
+  saveSiblingsData();
 });
 
 function addSiblingToSummary() {
@@ -272,6 +272,8 @@ function addSiblingToSummary() {
   yearGradCell.innerText = '';
 }
 
+  saveSiblingsData();
+
 function removeSummaryRow(button) {
   const row = button.parentNode.parentNode;
   const summaryTable = document.querySelector('.siblings-summary-table');
@@ -289,6 +291,123 @@ function removeSummaryRow(button) {
     cell.innerText = '**No siblings**';
   }
 }
+
+ saveSiblingsData();
+
+// ⭐ ADD THIS NEW FUNCTION HERE ⭐
+function saveSiblingsData() {
+  const hasSiblingsYes = document.getElementById("hasSiblingsYes").checked;
+  
+  if (!hasSiblingsYes) {
+    localStorage.setItem('siblingData', JSON.stringify([]));
+    console.log('✅ Saved: No siblings');
+    return;
+  }
+  
+  const summaryTable = document.querySelector('.siblings-summary-table');
+  const siblings = [];
+  
+  for (let i = 1; i < summaryTable.rows.length; i++) {
+    const row = summaryTable.rows[i];
+    if (row.querySelector('.no-siblings-text')) continue;
+    
+    const cells = row.cells;
+    siblings.push({
+      fullName: cells[1].innerText.trim(),
+      age: cells[2].innerText.trim(),
+      education: cells[3].innerText.trim(),
+      school: cells[4].innerText.trim(),
+      yearGraduated: cells[5].innerText.trim()
+    });
+  }
+  
+  localStorage.setItem('siblingData', JSON.stringify(siblings));
+  console.log('✅ Saved siblings data:', siblings);
+}
+
+// ================= SAVE SIBLINGS TO LOCALSTORAGE =================
+function saveSiblingsData() {
+  const hasSiblingsYes = document.getElementById("hasSiblingsYes").checked;
+  
+  if (!hasSiblingsYes) {
+    // No siblings - save empty array
+    localStorage.setItem('siblingData', JSON.stringify([]));
+    console.log('✅ Saved: No siblings');
+    return;
+  }
+  
+  const summaryTable = document.querySelector('.siblings-summary-table');
+  const siblings = [];
+  
+  // Start from row 1 to skip header (row 0)
+  for (let i = 1; i < summaryTable.rows.length; i++) {
+    const row = summaryTable.rows[i];
+    
+    // Skip the "no siblings" message row
+    if (row.querySelector('.no-siblings-text')) continue;
+    
+    const cells = row.cells;
+    
+    siblings.push({
+      fullName: cells[1].innerText.trim(),
+      age: cells[2].innerText.trim(),
+      education: cells[3].innerText.trim(),
+      school: cells[4].innerText.trim(),
+      yearGraduated: cells[5].innerText.trim()
+    });
+  }
+  
+  localStorage.setItem('siblingData', JSON.stringify(siblings));
+  console.log('✅ Saved siblings data:', siblings);
+}
+
+// ================= SAVE SOCIO-ECONOMIC DATA =================
+function saveSocioEconomicData() {
+  // Helper function to get Yes/No value from radio button
+  function getRadioValue(name) {
+    const radio = document.querySelector(`input[name="${name}"]:checked`);
+    if (!radio) return '';
+    
+    // If the radio has a value attribute, use it
+    if (radio.value && radio.value !== 'on') {
+      return radio.value;
+    }
+    
+    // Otherwise, get the label text
+    const label = radio.parentElement?.textContent?.trim() || '';
+    if (label.includes('Yes')) return 'Yes';
+    if (label.includes('No')) return 'No';
+    if (label.includes('Prefer not to say')) return 'Prefer not to say';
+    
+    return radio.value || '';
+  }
+
+  const socioEconomicData = {
+    firstMember: getRadioValue('first_member'),
+    fourPs: getRadioValue('4ps'),
+    indigenous: getRadioValue('indigenous'),
+    indigenousGroup: document.getElementById('indigenousSelect')?.value || 'N/A',
+    indigenousOther: document.getElementById('indigenousOther')?.value || '',
+    lgbtqia: getRadioValue('lgbtqia'),
+    idp: getRadioValue('idp'),
+    idpDetails: document.getElementById('idpDetails')?.value.trim() || '',
+    pwd: getRadioValue('pwd'),
+    disabilities: Array.from(document.querySelectorAll('.check-boxes input[type="checkbox"]:checked'))
+      .map(cb => cb.parentElement.textContent.trim()),
+    soloParent: getRadioValue('solo_parent'),
+    monthlyIncome: getRadioValue('income')
+  };
+  
+  // Get income label text if needed
+  const incomeRadio = document.querySelector('input[name="income"]:checked');
+  if (incomeRadio) {
+    socioEconomicData.monthlyIncome = incomeRadio.parentElement.textContent.trim();
+  }
+  
+  localStorage.setItem('socioEconomicData', JSON.stringify(socioEconomicData));
+  console.log('✅ Saved socio-economic data:', socioEconomicData);
+}
+
 
 // ================= PH ADDRESS CASCADING =================
 (() => {
@@ -590,6 +709,7 @@ if (middleNameValue === "") {
     }
   });
 
+  //otherinfo socio economic
   const firstMemberField = document.querySelector('.vertical-field');
   const firstMember = document.querySelector('input[name="first_member"]:checked');
   
@@ -710,6 +830,8 @@ if (middleNameValue === "") {
     soloField.classList.remove('error');
   }
 
+
+  //income
   const incomeField = document.getElementById('incomeField');
   const estimatedInc = document.querySelector('input[name="income"]:checked');
 
@@ -864,42 +986,88 @@ if (middleNameValue === "") {
     mobileNumber: document.getElementById('mobile')?.value || '',
     landlineNumber: document.getElementById('telephone')?.value || 'N/A',
     email: document.getElementById('email')?.value || '',
-    contactPerson: document.getElementById('contactName')?.value.toUpperCase() || ''
-  };
+    contactPerson: document.getElementById('contactName')?.value.toUpperCase() || '',
+    contactAddress: document.getElementById('contactAddress')?.value.toUpperCase() || '',
+    contactMobile: document.getElementById('contactMobile')?.value || '',
+    contactRelationship: document.getElementById('contactRelationship')?.value || ''
+};
 
-  const parentsTable = document.getElementById('parentsBox');
-  const parentRows = parentsTable.querySelectorAll('tr');
-  
-  const parentalData = {
-    motherName: parentRows[0]?.cells[0]?.textContent.trim().toUpperCase() || '',
-    motherAge: parentRows[0]?.cells[1]?.textContent.trim() || '',
-    motherOccupation: parentRows[0]?.cells[2]?.textContent.trim().toUpperCase() || '',
-    motherContact: parentRows[0]?.cells[3]?.textContent.trim() || '',
-    fatherName: parentRows[1]?.cells[0]?.textContent.trim().toUpperCase() || '',
-    fatherAge: parentRows[1]?.cells[1]?.textContent.trim() || '',
-    fatherOccupation: parentRows[1]?.cells[2]?.textContent.trim().toUpperCase() || '',
-    fatherContact: parentRows[1]?.cells[3]?.textContent.trim() || ''
-  };
+// Get parental data from the contenteditable cells
+const parentalData = {
+    fatherLast: getValue("fatherLast"),
+    fatherFirst: getValue("fatherFirst"),
+    fatherMiddle: getValue("fatherMiddle"),
+    fatherAge: getValue("fatherAge"),
+    fatherOccupation: getValue("fatherOccupation"),
+    fatherContact: getValue("fatherContact"),
 
-  localStorage.setItem('personalData', JSON.stringify(personalData));
-  localStorage.setItem('parentalData', JSON.stringify(parentalData));
+    motherLast: getValue("motherLast"),
+    motherFirst: getValue("motherFirst"),
+    motherMiddle: getValue("motherMiddle"),
+    motherAge: getValue("motherAge"),
+    motherOccupation: getValue("motherOccupation"),
+    motherContact: getValue("motherContact"),
+};
 
-  console.log('✅ Personal data saved:', personalData);
-  console.log('✅ Parental data saved:', parentalData);
+// Save to localStorage
+localStorage.setItem('personalData', JSON.stringify(personalData));
+localStorage.setItem('parentalData', JSON.stringify(parentalData));
 
-  window.location.href = "educattach.html";
+console.log('✅ Personal data saved:', personalData);
+console.log('✅ Parental data saved:', parentalData);
+console.log('✅ Parental data in storage:', localStorage.getItem('parentalData'));
+
+saveSiblingsData();
+
+saveSocioEconomicData();
+
+// Navigate to next page
+window.location.href = "educattach.html";
+
+// =============================
+// AUTO-LOAD SAVED VALUES
+// =============================
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("[contenteditable='true']").forEach(cell => {
+        const key = cell.dataset.key;
+        if (key) {
+            const savedValue = localStorage.getItem(key);
+            if (savedValue) cell.textContent = savedValue;
+        }
+    });
+});
+
+
+// =============================
+// AUTO-SAVE WHEN USER TYPES
+// =============================
+document.querySelectorAll("[contenteditable='true']").forEach(cell => {
+    cell.addEventListener("input", () => {
+        const key = cell.dataset.key;
+        if (key) {
+            localStorage.setItem(key, cell.innerText.trim());
+        }
+    });
+});
+
+// =============================
+// HELPER: GET VALUE USING data-key
+// =============================
+function getValue(key) {
+    const cell = document.querySelector(`[data-key="${key}"]`);
+    if (!cell) return "";
+
+    let value = cell.textContent.trim();
+
+    // Auto-uppercase names + occupations
+    if (key.includes("Last") || key.includes("First") || key.includes("Middle") || key.includes("Occupation")) {
+        value = value.toUpperCase();
+    }
+
+    return value;
 }
 
-document.getElementById('nationality').addEventListener('change', function() {
-  const otherContainer = document.getElementById('otherNationalityContainer');
-  if (this.value === "Other") {
-    otherContainer.style.display = "block";
-  } else {
-    otherContainer.style.display = "none";
-    document.getElementById('otherNationality').value = "";
-    document.getElementById('otherNationality').classList.remove('error');
-  }
-});
+}
 
 // ====================== SAVE PROGRESS SYSTEM ======================
 
@@ -1317,3 +1485,29 @@ window.addEventListener("DOMContentLoaded", () => {
   console.log("Has Siblings:", localStorage.getItem("hasSiblings"));
   console.log("Siblings Summary:", localStorage.getItem("siblingsSummary"));
 });
+
+// Auto-save PWD checkboxes
+document.querySelectorAll('.check-boxes input[type="checkbox"]').forEach(checkbox => {
+  checkbox.addEventListener('change', () => {
+    saveSocioEconomicData(); // Save immediately when checkbox changes
+  });
+});
+
+// Load PWD checkboxes on page load
+window.addEventListener('DOMContentLoaded', () => {
+  const savedCheckboxes = JSON.parse(localStorage.getItem('pwdCheckboxes') || '[]');
+  document.querySelectorAll('.check-boxes input[type="checkbox"]').forEach(checkbox => {
+    const label = checkbox.parentElement.textContent.trim();
+    if (savedCheckboxes.includes(label)) {
+      checkbox.checked = true;
+    }
+  });
+});
+
+// Add this to check what's being saved (add to console):
+console.log('=== STORED DATA CHECK ===');
+console.log('Socio-Economic:', localStorage.getItem('socioEconomicData'));
+console.log('First Member:', localStorage.getItem('first_member'));
+console.log('4Ps:', localStorage.getItem('4ps'));
+console.log('Indigenous:', localStorage.getItem('indigenous'));
+console.log('PWD:', localStorage.getItem('pwd'));

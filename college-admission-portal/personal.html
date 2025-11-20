@@ -317,8 +317,8 @@
         <div class="form-group vertical-field">
           <label><u>* Are you the first member in the family (i.e. parents and siblings) to apply for College/ Tertiary Education?</u></label>
           <div class="radio-group">
-            <label class="no-underline"><input type="radio" name="first_member"> Yes</label>
-            <label class="no-underline"><input type="radio" name="first_member"> No</label>
+           <label class="no-underline"><input type="radio" name="first_member" value="Yes"> Yes</label>
+           <label class="no-underline"><input type="radio" name="first_member" value="No"> No</label>
           </div>
         </div>
 
@@ -331,9 +331,9 @@
             </div>
           </div>
           <div class="radio-group">
-            <label class="no-underline"><input type="radio" name="4ps"> Yes</label>
-            <label class="no-underline"><input type="radio" name="4ps"> No</label>
-          </div>
+            <label class="no-underline"><input type="radio" name="4ps" value="Yes"> Yes</label>
+            <label class="no-underline"><input type="radio" name="4ps" value="No"> No</label>
+         </div>
         </div>
 
         <!-- Indigenous Group -->
@@ -464,9 +464,9 @@
             <p><b>LGBTQIA+</b> stands for lesbian, gay, bisexual, transgender, queer (or sometimes questioning), intersex, asexual, and others.</p>
           </div>
           <div class="radio-group">
-            <label class="no-underline"><input type="radio" name="lgbtqia"> Yes</label>
-            <label class="no-underline"><input type="radio" name="lgbtqia"> No</label>
-            <label class="no-underline"><input type="radio" name="lgbtqia"> Prefer not to say</label>
+            <label class="no-underline"><input type="radio" name="lgbtqia" value="Yes"> Yes</label>
+            <label class="no-underline"><input type="radio" name="lgbtqia" value="No"> No</label>
+            <label class="no-underline"><input type="radio" name="lgbtqia" value="Prefer not to say"> Prefer not to say</label>
           </div>
         </div>
 
@@ -538,8 +538,8 @@
         <div class="form-group vertical-field" id="pwdField">
           <label><u>* Are you a person with disability?</u></label>
           <div class="radio-group">
-            <label class="no-underline"><input type="radio" name="pwd"> Yes</label>
-            <label class="no-underline"><input type="radio" name="pwd"> No</label>
+            <label class="no-underline"><input type="radio" name="pwd" value="Yes"> Yes</label>
+            <label class="no-underline"><input type="radio" name="pwd" value="No"> No</label>
           </div>
         </div>
 
@@ -617,8 +617,8 @@
             <p><b>Solo parent</b> refers to a parent who is left alone with the responsibility of parenthood due to death, detention, mental incapacity or legal separation with spouse.</p>
           </div>
           <div class="radio-group">
-            <label class="no-underline"><input type="radio" name="solo_parent"> Yes</label>
-            <label class="no-underline"><input type="radio" name="solo_parent"> No</label>
+            <label class="no-underline"><input type="radio" name="solo_parent" value="Yes"> Yes</label>
+            <label class="no-underline"><input type="radio" name="solo_parent" value="No"> No</label>
           </div>
         </div>
       </div>
@@ -649,12 +649,12 @@
             </tr>
             <tr>
               <td><u>Father</u></td>
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
+              <td contenteditable="true" data-key="fatherLast"></td>
+              <td contenteditable="true" data-key="fatherFirst"></td>
+              <td contenteditable="true" data-key="fatherMiddle"></td>
+              <td contenteditable="true" data-key="fatherAge"></td>
+              <td contenteditable="true" data-key="fatherOccupation"></td>
+              <td contenteditable="true" data-key="fatherContact"></td>
             </tr>
             <tr>
               <td rowspan="2"><u>Mother</u></td>
@@ -662,12 +662,12 @@
               <td colspan="3" class="maiden-cell"></td>
             </tr>
             <tr>
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
+              <td contenteditable="true" data-key="motherLast"></td>
+              <td contenteditable="true" data-key="motherFirst"></td>
+              <td contenteditable="true" data-key="motherMiddle"></td>
+              <td contenteditable="true" data-key="motherAge"></td>
+              <td contenteditable="true" data-key="motherOccupation"></td>
+              <td contenteditable="true" data-key="motherContact"></td>
             </tr>
           </table>
 
