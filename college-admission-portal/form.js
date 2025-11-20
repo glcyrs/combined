@@ -204,13 +204,13 @@ allTables.forEach(table => {
       if (transferred === 'yes') {
         cell.innerHTML = `
           <strong>Have you ever transferred during your Senior Your High School?</strong><br>
-          <span style="margin-left:20px;">☑ <i>Yes, previously from ${transferredFrom || '___'} (Year: ${transferredYear || '___'})</i></span>
+          <span style="margin-left:20px;">☑ <i>Yes</i></span>
           <span style="margin-left:20px;">☐ <i>No</i></span>
         `;
       } else if (transferred === 'no') {
         cell.innerHTML = `
           <strong>Have you ever transferred during your Senior Your High School?</strong><br>
-          <span style="margin-left:20px;">☐ <i>Yes, previously from</i></span>
+          <span style="margin-left:20px;">☐ <i>Yes</i></span>
           <span style="margin-left:20px;">☑ <i>No</i></span>
         `;
       }
