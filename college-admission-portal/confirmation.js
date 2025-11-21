@@ -1,3 +1,4 @@
+
 // =====================================================
 // GRADE CARD DOWNLOAD ALERT
 // =====================================================
@@ -222,4 +223,3 @@ document.querySelectorAll("input, select, textarea").forEach(field => {
     }
   }
 });
-

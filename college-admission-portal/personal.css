@@ -186,8 +186,8 @@ body {
   content: "";
   position: absolute;
   top: 30%;
-  left: 50px; /* margin from left */
-  right: 50px; /* margin from right */
+  left: 65px; /* margin from left */
+  right: 65px; /* margin from right */
   height: 2px;
   background-color: #ccc;
   z-index: -1; /* put behind the step circles */

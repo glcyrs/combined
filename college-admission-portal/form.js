@@ -217,20 +217,19 @@ allTables.forEach(table => {
       transferUpdated = true;
     }
     
-    // Handle Type of School (only once)
-    if (!schoolTypeUpdated && cell.textContent.includes('Type of School')) {
-        console.log('✅ Found Type of School cell');
-        console.log('📚 Populating with:', schoolType);
-        
-        cell.innerHTML = `
-          <strong>Type of School</strong><br>
-          <span style="margin-left:20px;">${schoolType === 'public' ? '☑' : '☐'} <i>Public</i></span>
-          <span style="margin-left:20px;">${schoolType === 'suc' ? '☑' : '☐'} <i>SUC</i></span><br>
-          <span style="margin-left:20px;">${schoolType === 'private' ? '☑' : '☐'} <i>Private</i></span>
-          <span style="margin-left:20px;">${schoolType === 'lcu' ? '☑' : '☐'} <i>LCU</i></span>
-        `;
-        schoolTypeUpdated = true;
-      }
+// Handle Type of School (only once)
+if (!schoolTypeUpdated && cell.textContent.includes('Type of School')) {
+    console.log('✅ Found Type of School cell');
+    console.log('📚 Populating with:', schoolType);
+    
+    cell.innerHTML = `
+      <strong>Type of School</strong><br>
+      <span style="margin-left:20px;">${schoolType === 'private' ? '☑' : '☐'} <i>Private</i></span>
+      <span style="margin-left:20px;">${schoolType === 'public' ? '☑' : '☐'} <i>Public</i></span>
+      <span style="margin-left:20px;">${schoolType === 'als' ? '☑' : '☐'} <i>Alternative Learning School</i></span>
+    `;
+    schoolTypeUpdated = true;
+}
     });
   });
 });
@@ -705,4 +704,3 @@ if (otherInfoSection && socioEconomicData) {
   // ====== Initial render ======
   updateSteps();
 });
-

@@ -1,3 +1,4 @@
+
 const downloads = [
   'assets/grades_form_1.pdf',
   'assets/grades_form_2.pdf'
@@ -426,6 +427,18 @@ function syncGradesToGradesData() {
         }
       });
 
+      // Validate School Type (radio buttons)
+const schoolTypeSelected = document.querySelector('input[name="schoolType"]:checked');
+
+if (!schoolTypeSelected) {
+  isValid = false;
+  showNotification("Please select a School Type!", "error");
+
+  // Optional: highlight radio group
+  const radioGroup = document.querySelector('.radio-group');
+  if (radioGroup) radioGroup.classList.add("input-error");
+}
+
       showNotification("Please fill out all required fields, complete all grades, and upload all attachments!", "error");
       return;
     }
@@ -512,25 +525,41 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  //  SCHOOL TYPE CODE  
-  const schoolTypeRadios = document.querySelectorAll('input[name="schoolType"]');
+// SCHOOL TYPE CODE — FULLY FIXED VERSION WITH REQUIRED VALIDATION
 
-// Load saved school type on page load
-const savedSchoolType = localStorage.getItem('edu-schoolType');
-schoolTypeRadios.forEach(radio => {
-  if (savedSchoolType && radio.value === savedSchoolType) {
-    radio.checked = true;
+// Save selection immediately whenever user changes radio
+document.addEventListener("change", function (e) {
+  if (e.target.name === "schoolType") {
+    localStorage.setItem("edu-schoolType", e.target.value);
+    console.log("Saved:", e.target.value);
   }
-  
-  // Save school type when changed
-  radio.addEventListener('change', () => {
-    if (radio.checked) {
-      localStorage.setItem('edu-schoolType', radio.value);
-      console.log('✅ School type saved:', radio.value);
-    }
-  });
 });
-  //  END OF SCHOOL TYPE CODE 
+
+// Restore saved answer AFTER the page fully loads
+window.onload = function () {
+  const saved = localStorage.getItem("edu-schoolType");
+  console.log("Loaded saved value:", saved);
+
+  if (saved) {
+    const selectedRadio = document.querySelector(
+      `input[name="schoolType"][value="${saved}"]`
+    );
+
+    if (selectedRadio) {
+      selectedRadio.checked = true;
+      console.log("Restored selected radio:", saved);
+
+      // IMPORTANT: Trigger browser validation to accept restored value
+      selectedRadio.dispatchEvent(new Event("change"));
+    } else {
+      console.log("Saved value found but no matching radio");
+    }
+  } else {
+    console.log("No saved schoolType available");
+  }
+};
+
+//  END OF SCHOOL TYPE CODE
 
 
   const shsInputs = document.querySelectorAll('.grades-table2 input[type="number"]');
@@ -593,27 +622,32 @@ schoolTypeRadios.forEach(radio => {
 
   updateFileList();
 
-  const eduFields = document.querySelectorAll('.container2 input, .container2 select, .container2 textarea');
-  eduFields.forEach(field => {
-    const saved = localStorage.getItem(`edu-${field.name}`);
-    if (saved !== null) {
-      if (field.type === "checkbox" || field.type === "radio") {
-        field.checked = saved === "true";
-      } else {
-        field.value = saved;
-      }
-      field.classList.remove("input-error");
-    }
+const eduFields = document.querySelectorAll('.container2 input, .container2 select, .container2 textarea');
 
-    field.addEventListener("change", () => {
-      if (field.type === "checkbox" || field.type === "radio") {
-        localStorage.setItem(`edu-${field.name}`, field.checked);
-      } else {
-        localStorage.setItem(`edu-${field.name}`, field.value);
-      }
-      field.classList.remove("input-error");
-    });
+eduFields.forEach(field => {
+
+  //  Ignore schoolType here (handled by dedicated radio code)
+  if (field.name === "schoolType") return;
+
+  const saved = localStorage.getItem(`edu-${field.name}`);
+  if (saved !== null) {
+    if (field.type === "checkbox") {
+      field.checked = saved === "true";
+    } else {
+      field.value = saved;
+    }
+    field.classList.remove("input-error");
+  }
+
+  field.addEventListener("change", () => {
+    if (field.type === "checkbox") {
+      localStorage.setItem(`edu-${field.name}`, field.checked);
+    } else {
+      localStorage.setItem(`edu-${field.name}`, field.value);
+    }
+    field.classList.remove("input-error");
   });
+});
 
   // 🔥 Initial sync on page load
   syncGradesToGradesData();

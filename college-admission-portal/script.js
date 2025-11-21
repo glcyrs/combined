@@ -1,4 +1,3 @@
-
 const downloads = [
   'assets/grades_form_1.pdf', // for the first card
   'assets/grades_form_2.pdf'  // for the second card
