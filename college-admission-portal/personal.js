@@ -199,17 +199,11 @@ function handlePhotoUpload() {
 
 // ================= SIBLINGS SHOW/HIDE =================
 document.getElementById("hasSiblingsYes").addEventListener("change", () => {
-  document.getElementById("addSiblingHeader").style.display = "block";
-  document.getElementById("addSiblingBox").style.display = "block";
-  document.getElementById("summaryHeader").style.display = "block";
-  document.getElementById("summaryBox").style.display = "block";
+  applySiblingsVisibility("Yes");
   saveSiblingsData();
 });
 document.getElementById("hasSiblingsNo").addEventListener("change", () => {
-  document.getElementById("addSiblingHeader").style.display = "none";
-  document.getElementById("addSiblingBox").style.display = "none";
-  document.getElementById("summaryHeader").style.display = "block";
-  document.getElementById("summaryBox").style.display = "block";
+  applySiblingsVisibility("No");
   saveSiblingsData();
 });
 
@@ -900,52 +894,56 @@ if (middleNameValue === "") {
     }
   }
 
-  const hasSiblings = document.querySelector('input[name="hasSiblings"]:checked');
-  const summaryTable = document.querySelector('.siblings-summary-table');
+// SIBLINGS VALIDATION
+const hasSiblingsYes = document.getElementById("hasSiblingsYes");
+const hasSiblingsNo = document.getElementById("hasSiblingsNo");
+const summaryTable = document.querySelector('.siblings-summary-table');
+const siblingsField = document.getElementById('siblingsField');
+const addSiblingBox = document.getElementById('addSiblingBox');
+let siblingsError = false;
 
-  let siblingsError = false;
-
-  if (!hasSiblings) {
+// Check if neither radio is selected
+if (!hasSiblingsYes.checked && !hasSiblingsNo.checked) {
     siblingsError = true;
-  }
-
-  if (hasSiblings && hasSiblings.value === "yes") {
-    const dataRows = summaryTable.querySelectorAll("tr:not(.header-row):not(.no-siblings-text)");
-    const summaryHasData = dataRows.length > 0;
-
-    if (!summaryHasData) {
-      siblingsError = true;
-    }
-
-    const inputRow = document.getElementById('siblingsTable').rows[1];
-    const cells = Array.from(inputRow.cells).slice(0,5);
-    let rowHasText = false;
-
-    cells.forEach(cell => {
-      const select = cell.querySelector("select");
-      if (select && select.value.trim() !== "") rowHasText = true;
-      if (!select && cell.textContent.trim() !== "") rowHasText = true;
+    console.log("❌ No siblings option selected");
+} 
+// Check if YES is selected
+else if (hasSiblingsYes.checked) {
+    // Count valid rows (not the header, not the "no siblings" placeholder)
+    let validSiblingCount = 0;
+    const rows = summaryTable.querySelectorAll("tr");
+    
+    rows.forEach((row, index) => {
+        if (index === 0) return; // skip header
+        if (row.querySelector('.no-siblings-text')) return; // skip placeholder
+        validSiblingCount++;
     });
-
-    if (rowHasText && !summaryHasData) {
-      siblingsError = true;
+    
+    console.log("✅ Yes selected, sibling count:", validSiblingCount);
+    
+    if (validSiblingCount === 0) {
+        siblingsError = true;
+        console.log("❌ No siblings added to summary table");
     }
-  }
+}
 
-  if (siblingsError) {
+if (siblingsError) {
     siblingsField.classList.add("error");
-    addSiblingBox.classList.add("error");
+    if (addSiblingBox) addSiblingBox.classList.add("error");
     error = true;
-  } else {
+    console.log("❌ Siblings validation FAILED");
+} else {
     siblingsField.classList.remove("error");
-    addSiblingBox.classList.remove("error");
-  }
+    if (addSiblingBox) addSiblingBox.classList.remove("error");
+    console.log("✅ Siblings validation PASSED");
+}
 
-  if (error) { 
-    showNotification("Please complete all required fields before proceeding."); 
-    window.scrollTo({top:0, behavior:"smooth"}); 
-    return; 
-  }
+// STOP IF THERE ARE ERRORS
+if (error) {
+    showNotification("Please complete all required fields before proceeding.");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+}
 
   // ============================================
   // 🔥 SAVE ALL DATA TO LOCALSTORAGE BEFORE NAVIGATION
@@ -1267,21 +1265,50 @@ if (currentStep > maxUnlockedStep) {
 }
 
 const steps = document.querySelectorAll(".step");
+function updateStepsUI() {
+  steps.forEach((step, index) => {
+    const circle = step.querySelector("span"); // step number circle
+    const icon = step.querySelector("i");      // optional icon
+    const label = step.querySelector("p");     // step label
+    const isActive = index === currentStep;
 
-steps.forEach((step, index) => {
-  if (index === currentStep) {
-    step.classList.add("active");
-  }
-  if (index <= maxUnlockedStep) {
-    step.classList.add("unlocked");
-    step.style.cursor = "pointer";
-    step.querySelectorAll("*").forEach(el => el.style.pointerEvents = "none");
-    step.addEventListener("click", () => {
-      localStorage.setItem("maxUnlockedStep", Math.max(maxUnlockedStep, index));
-      window.location.href = pageMap[index];
-    });
-  }
-});
+    // Active step
+    step.classList.toggle("active", isActive);
+
+    if (index <= maxUnlockedStep) {
+      // Unlocked step
+      step.classList.add("clickable");
+      step.style.pointerEvents = "auto";
+      step.style.cursor = "pointer";
+
+      if (icon) icon.style.opacity = "1";
+      if (label) label.style.opacity = "1";
+      if (circle) circle.style.borderColor = isActive ? "#1a9737" : "#ccc";
+
+      // click handler
+      step.onclick = () => {
+        maxUnlockedStep = Math.max(maxUnlockedStep, index);
+        localStorage.setItem("maxUnlockedStep", maxUnlockedStep);
+        localStorage.setItem("lastVisitedStep", index);
+        const target = pageMap[index] || pageMap[0];
+        setTimeout(() => window.location.href = target, 50);
+      };
+    } else {
+      // Locked step
+      step.classList.remove("clickable");
+      step.style.pointerEvents = "none";
+      step.style.cursor = "default";
+
+      if (circle) circle.style.borderColor = "#ddd";
+      if (icon) icon.style.opacity = "0.4";
+      if (label) label.style.opacity = "0.5";
+
+      step.onclick = null; // remove click
+    }
+  });
+}
+
+updateStepsUI();
 
 function saveIncomeRadio() {
   const selected = document.querySelector('input[name="income"]:checked');
@@ -1318,6 +1345,7 @@ function applySiblingsVisibility(choice) {
   const box = document.getElementById("addSiblingBox");
   const summaryHeader = document.getElementById("summaryHeader");
   const summaryBox = document.getElementById("summaryBox");
+  const summaryTable = document.querySelector(".siblings-summary-table");
 
   if (choice === "Yes") {
     header.style.display = "block";
@@ -1327,8 +1355,22 @@ function applySiblingsVisibility(choice) {
   } else {
     header.style.display = "none";
     box.style.display = "none";
-    summaryHeader.style.display = "block";
-    summaryBox.style.display = "block";
+    summaryHeader.style.display = "none";
+    summaryBox.style.display = "none";
+    
+    // Clear the summary table when "No" is selected
+    const rows = summaryTable.querySelectorAll("tr:not(:first-child)");
+    rows.forEach(row => row.remove());
+    
+    // Add back the "No siblings" placeholder
+    const newRow = summaryTable.insertRow();
+    const cell = newRow.insertCell();
+    cell.colSpan = 7;
+    cell.className = "no-siblings-text";
+    cell.innerText = "**No siblings**";
+    
+    // Clear localStorage for siblings
+    localStorage.removeItem("siblingsSummary");
   }
 }
 

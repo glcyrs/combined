@@ -1,109 +1,114 @@
+// =============================================
+// DOWNLOAD HANDLER (kept the same)
+// =============================================
 const downloads = [
-  'assets/grades_form_1.pdf', // for the first card
-  'assets/grades_form_2.pdf'  // for the second card
+  'assets/grades_form_1.pdf',
+  'assets/grades_form_2.pdf'
 ];
 
 document.querySelectorAll('.grade-card').forEach((card, index) => {
   card.addEventListener('click', () => {
     const link = document.createElement('a');
     link.href = downloads[index];
-    link.download = downloads[index].split('/').pop(); // set filename
+    link.download = downloads[index].split('/').pop();
     link.click();
   });
 });
 
-// ====== Map pages to step index ======
-const pageToStep = {
-  "index.html": 0,
-  "readfirst.html": 1,
-  "confirmation.html": 2,
-  "aap.html": 3,
-  "personal.html": 4,
-  "educattach.html": 5,
-  "programs.html": 6,
-  "form.html": 7,
-  "submit.html": 8,
-  // add more pages if needed
-};
+// =============================================
+// UNIFIED STEP SYSTEM (Same as confirmation.js)
+// =============================================
 
-// ====== Get current page ======
-const currentPage = window.location.pathname.split("/").pop();
+// Step index → page map
+const pageMap = [
+  "index.html",
+  "readfirst.html",
+  "confirmation.html",
+  "aap.html",
+  "personal.html",
+  "educattach.html",
+  "programs.html",
+  "form.html",
+  "submit.html"
+];
 
-// ====== Load progress safely ======
-let savedStep = parseInt(localStorage.getItem("currentStep"));
-let currentStep = pageToStep[currentPage] !== undefined ? pageToStep[currentPage] : (savedStep || 5);
-let maxUnlockedStep = parseInt(localStorage.getItem("maxUnlockedStep")) || currentStep;
+// Detect current page
+let currentPage = window.location.pathname.split("/").pop().toLowerCase();
+if (!currentPage) currentPage = "index.html";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const steps = document.querySelectorAll(".step");
+// Determine step index
+let currentStep = pageMap.indexOf(currentPage);
 
-  // ====== Update step UI ======
-  function updateSteps() {
-    steps.forEach((step, index) => {
-      // ACTIVE step (green)
-      step.classList.toggle("active", index === currentStep);
+// Load saved max progress (UNIFIED KEY)
+let maxUnlockedStep = parseInt(localStorage.getItem("maxUnlockedStep")) || 0;
 
-      // CLICKABLE or LOCKED
-      if (index <= maxUnlockedStep) {
-        step.classList.add("clickable");
-        step.style.pointerEvents = "auto";
-        step.style.opacity = "1";
-      } else {
-        step.classList.remove("clickable");
-        step.style.pointerEvents = "none";
-        step.style.opacity = "1";
-      }
-    });
+// Unlock new step if reached
+if (currentStep > maxUnlockedStep) {
+  maxUnlockedStep = currentStep;
+  localStorage.setItem("maxUnlockedStep", maxUnlockedStep);
+}
 
-    // Save progress
-    localStorage.setItem("currentStep", currentStep);
-    localStorage.setItem("maxUnlockedStep", maxUnlockedStep);
-  }
+// Get step UI circles
+const steps = document.querySelectorAll(".step");
 
-  // ====== Step click navigation ======
+// Update UI (same logic as confirmation.js)
+function updateStepsUI() {
   steps.forEach((step, index) => {
-    step.addEventListener("click", () => {
-      if (index > maxUnlockedStep) return; // block locked steps
+    const circle = step.querySelector("span");
+    const icon = step.querySelector("i");
+    const label = step.querySelector("p");
 
-      currentStep = index;
-      updateSteps();
+    const isActive = index === currentStep;
+    step.classList.toggle("active", isActive);
 
-      // Optional: show section if you have this function
-      if (typeof showSection === "function") showSection(currentStep);
+    if (index <= maxUnlockedStep) {
+      // unlocked
+      step.classList.add("clickable");
+      step.style.pointerEvents = "auto";
+      step.style.cursor = "pointer";
 
-      // Navigate pages based on step
-      switch (index) {
-      case 0: window.location.href = "index.html"; break;
-      case 1: window.location.href = "readfirst.html"; break;
-      case 2: window.location.href = "confirmation.html"; break;
-      case 3: window.location.href = "aap.html"; break;
-      case 4: window.location.href = "personal.html"; break;
-      case 5: window.location.href = "educattach.html"; break;
-      case 6: window.location.href = "programs.html"; break;
-      case 7: window.location.href = "form.html"; break;
-      case 8: window.location.href = "submit.html"; break;
-        // Add more steps/pages here
-      }
-    });
+      if (icon) icon.style.opacity = "1";
+      if (label) label.style.opacity = "1";
+      if (circle) circle.style.borderColor = isActive ? "#1a9737" : "#ccc";
+
+      step.onclick = () => {
+        localStorage.setItem("maxUnlockedStep", Math.max(maxUnlockedStep, index));
+        window.location.href = pageMap[index];
+      };
+    } else {
+      // locked
+      step.classList.remove("clickable");
+      step.style.pointerEvents = "none";
+      step.style.cursor = "default";
+
+      if (circle) circle.style.borderColor = "#ddd";
+      if (icon) icon.style.opacity = "0.4";
+      if (label) label.style.opacity = "0.5";
+
+      step.onclick = null;
+    }
   });
+}
 
-  // ====== Initial render ======
-  updateSteps();
-});
+updateStepsUI();
 
-console.log("✅ readfirst.js loaded successfully");
+console.log("✅ readfirst.js (unified version) loaded successfully");
 
-// Wait until .next-btn exists (since content is dynamically injected)
+// =============================================
+// ADD NEXT BUTTON HANDLER (same behavior kept)
+// =============================================
 const checkNextBtn = setInterval(() => {
   const nextBtn = document.querySelector(".next-btn");
   if (nextBtn) {
-    console.log("✅ .next-btn found, attaching click event");
+    console.log("➡️ .next-btn ready");
 
     nextBtn.addEventListener("click", () => {
-      console.log("➡️ Next button clicked — dispatching gotoStep(2)");
+      console.log("➡️ Next clicked → go to Confirmation");
 
-      // Dispatch the gotoStep event to trigger confirmation load
-      document.dispatchEvent(new CustomEvent("gotoStep", { detail: { step: 2 } }));
+      // Unlock confirmation page automatically
+      localStorage.setItem("maxUnlockedStep", Math.max(maxUnlockedStep, 2));
+
+      window.location.href = "confirmation.html";
     });
 
     clearInterval(checkNextBtn);

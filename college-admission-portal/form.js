@@ -30,55 +30,82 @@ const currentPage = window.location.pathname.split("/").pop();
 
 // ====== Load progress safely ======
 let savedStep = parseInt(localStorage.getItem("currentStep"));
-let currentStep = pageToStep[currentPage] !== undefined ? pageToStep[currentPage] : (savedStep || 5);
-let maxUnlockedStep = parseInt(localStorage.getItem("maxUnlockedStep")) || currentStep;
+let currentStep = pageToStep[currentPage] !== undefined ? pageToStep[currentPage] : (savedStep || 7);
+let storedMax = parseInt(localStorage.getItem("maxUnlockedStep"));
+let maxUnlockedStep = (storedMax !== null && !isNaN(storedMax)) ? storedMax : currentStep;
 
 document.addEventListener("DOMContentLoaded", () => {
   const steps = document.querySelectorAll(".step");
 
   // ====== Update step UI ======
-  function updateSteps() {
+  function updateStepsUI() {
     steps.forEach((step, index) => {
-      step.classList.toggle("active", index === currentStep);
+      const circle = step.querySelector("span"); // step number circle
+      const icon = step.querySelector("i");      // optional icon
+      const label = step.querySelector("p");     // step label
+      const isActive = index === currentStep;
+
+      // Active step
+      step.classList.toggle("active", isActive);
 
       if (index <= maxUnlockedStep) {
+        // Unlocked step
         step.classList.add("clickable");
         step.style.pointerEvents = "auto";
-        step.style.opacity = "1";
+        step.style.cursor = "pointer";
+
+        if (icon) icon.style.opacity = "1";
+        if (label) label.style.opacity = "1";
+        if (circle) circle.style.borderColor = isActive ? "#1a9737" : "#ccc";
+
+        // Click handler
+        step.onclick = () => {
+          if (index > maxUnlockedStep) return;
+
+          currentStep = index;
+
+          // Unlock next step if clicking last unlocked
+          if (currentStep === maxUnlockedStep && maxUnlockedStep < steps.length - 1) {
+            maxUnlockedStep++;
+          }
+
+          localStorage.setItem("currentStep", currentStep);
+          localStorage.setItem("maxUnlockedStep", maxUnlockedStep);
+
+          updateStepsUI();
+
+          if (typeof showSection === "function") showSection(currentStep);
+
+          // Navigate to page
+          switch (index) {
+            case 0: window.location.href = "index.html"; break;
+            case 1: window.location.href = "readfirst.html"; break;
+            case 2: window.location.href = "confirmation.html"; break;
+            case 3: window.location.href = "aap.html"; break;
+            case 4: window.location.href = "personal.html"; break;
+            case 5: window.location.href = "educattach.html"; break;
+            case 6: window.location.href = "programs.html"; break;
+            case 7: window.location.href = "form.html"; break;
+            case 8: window.location.href = "submit.html"; break;
+          }
+        };
       } else {
+        // Locked step
         step.classList.remove("clickable");
         step.style.pointerEvents = "none";
-        step.style.opacity = "1";
+        step.style.cursor = "default";
+
+        if (circle) circle.style.borderColor = "#ddd";
+        if (icon) icon.style.opacity = "0.4";
+        if (label) label.style.opacity = "0.5";
+
+        step.onclick = null; // remove click
       }
     });
-
-    localStorage.setItem("currentStep", currentStep);
-    localStorage.setItem("maxUnlockedStep", maxUnlockedStep);
   }
 
-  // ====== Step click navigation ======
-  steps.forEach((step, index) => {
-    step.addEventListener("click", () => {
-      if (index > maxUnlockedStep) return;
-
-      currentStep = index;
-      updateSteps();
-
-      if (typeof showSection === "function") showSection(currentStep);
-
-      switch (index) {
-        case 0: window.location.href = "index.html"; break;
-        case 1: window.location.href = "readfirst.html"; break;
-        case 2: window.location.href = "confirmation.html"; break;
-        case 3: window.location.href = "aap.html"; break;
-        case 4: window.location.href = "personal.html"; break;
-        case 5: window.location.href = "educattach.html"; break;
-        case 6: window.location.href = "programs.html"; break;
-        case 7: window.location.href = "form.html"; break;
-        case 8: window.location.href = "submit.html"; break;
-      }
-    });
-  });
+  // Initial UI render
+  updateStepsUI();
 
   // ====== POPULATE FORM FROM LOCALSTORAGE ======
   function populateForm() {
@@ -102,6 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const transferredYear = localStorage.getItem('field_transferredYear') || '';
       const bsuGraduate = localStorage.getItem('field_bsuGraduate') || '';
       const bsuSchool = localStorage.getItem('field_bsuSchool') || '';
+      const schoolType = localStorage.getItem('edu-schoolType') || 'public,private';
 
       // GET AAP DATA
       const aapSelection = localStorage.getItem('field_aap') || '';
@@ -122,30 +150,93 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // POPULATE TRANSFER STATUS IN EDUCATIONAL INFORMATION
-      const educationalTables = document.querySelectorAll('.form-section table');
-      if (educationalTables.length > 0) {
-        const educationalTable = educationalTables[0];
-        const allRows = educationalTable.querySelectorAll('tr');
+const allTables = document.querySelectorAll('table');
+
+allTables.forEach(table => {
+  const allRows = table.querySelectorAll('tr');
+  
+  allRows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    
+    cells.forEach(cell => {
+      // Check if this cell contains the transfer question
+      if (cell.textContent.includes('Have you ever transferred')) {
+        console.log('Found transfer cell:', cell.textContent); // Debug log
         
-        allRows.forEach(row => {
-          const cell = row.querySelector('td[colspan="2"]');
-          if (cell && cell.innerHTML.includes('Have you ever transferred')) {
-            if (transferred === 'yes') {
-              cell.innerHTML = `
-                <strong>Have you ever transferred during your Senior Your High School?</strong><br>
-                <span style="margin-left:20px;">☑ <i>Yes, previously from ${transferredFrom || '___'} (Year: ${transferredYear || '___'})</i></span>
-                <span style="margin-left:20px;">☐ <i>No</i></span>
-              `;
-            } else if (transferred === 'no') {
-              cell.innerHTML = `
-                <strong>Have you ever transferred during your Senior Your High School?</strong><br>
-                <span style="margin-left:20px;">☐ <i>Yes, previously from</i></span>
-                <span style="margin-left:20px;">☑ <i>No</i></span>
-              `;
-            }
-          }
-        });
+        if (transferred === 'yes') {
+          cell.innerHTML = `
+            <strong>Have you ever transferred during your Senior Your High School?</strong><br>
+            <span style="margin-left:20px;">☑ <i>Yes</i></span>
+            <span style="margin-left:20px;">☐ <i>No</i></span>
+          `;
+        } else if (transferred === 'no') {
+          cell.innerHTML = `
+            <strong>Have you ever transferred during your Senior Your High School?</strong><br>
+            <span style="margin-left:20px;">☐ <i>Yes</i></span>
+            <span style="margin-left:20px;">☑ <i>No</i></span>
+          `;
+        }
       }
+    });
+  });
+
+// POPULATE TRANSFER STATUS AND TYPE OF SCHOOL
+const allTables = document.querySelectorAll('table');
+const schoolType = localStorage.getItem('edu-schoolType') || 'public'; // Changed from 'field_schoolType'
+
+console.log('🔍 Looking for Type of School...');
+console.log('📚 School type from storage:', schoolType);
+
+let transferUpdated = false;
+let schoolTypeUpdated = false;
+
+allTables.forEach(table => {
+  const allRows = table.querySelectorAll('tr');
+  
+  allRows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    
+    cells.forEach(cell => {
+    // Handle Transfer Status (only once)
+    if (!transferUpdated && cell.textContent.includes('Have you ever transferred')) {
+      console.log('✅ Found transfer cell');
+      
+      if (transferred === 'yes') {
+        cell.innerHTML = `
+          <strong>Have you ever transferred during your Senior Your High School?</strong><br>
+          <span style="margin-left:20px;">☑ <i>Yes</i></span>
+          <span style="margin-left:20px;">☐ <i>No</i></span>
+        `;
+      } else if (transferred === 'no') {
+        cell.innerHTML = `
+          <strong>Have you ever transferred during your Senior Your High School?</strong><br>
+          <span style="margin-left:20px;">☐ <i>Yes</i></span>
+          <span style="margin-left:20px;">☑ <i>No</i></span>
+        `;
+      }
+      transferUpdated = true;
+    }
+    
+// Handle Type of School (only once)
+if (!schoolTypeUpdated && cell.textContent.includes('Type of School')) {
+    console.log('✅ Found Type of School cell');
+    console.log('📚 Populating with:', schoolType);
+    
+    cell.innerHTML = `
+      <strong>Type of School</strong><br>
+      <span style="margin-left:20px;">${schoolType === 'private' ? '☑' : '☐'} <i>Private</i></span>
+      <span style="margin-left:20px;">${schoolType === 'public' ? '☑' : '☐'} <i>Public</i></span>
+      <span style="margin-left:20px;">${schoolType === 'als' ? '☑' : '☐'} <i>Alternative Learning School</i></span>
+    `;
+    schoolTypeUpdated = true;
+}
+    });
+  });
+});
+
+console.log('✅ Transfer updated:', transferUpdated);
+console.log('✅ School type updated:', schoolTypeUpdated);
+});
 
       // POPULATE AAP CHECKBOXES
       const aapCheckboxes = document.querySelectorAll('.instructions-right .checkbox-item');
@@ -511,31 +602,72 @@ if (otherInfoSection && socioEconomicData) {
       isYes ? '☑ <i>Yes</i> ☐ <i>No</i>' : '☐ <i>Yes</i> ☑ <i>No</i>';
   }
   
-  // Monthly Family Income
+
+// Monthly Family Income - FINAL FIX (Normalized comparison)
   if (socioEconomicData.monthlyIncome) {
-    const incomeSection = otherInfoSection.querySelector('strong');
-    if (incomeSection && incomeSection.textContent.includes('Estimated Monthly Family Income')) {
-      const incomeDiv = incomeSection.parentElement;
-      const incomeOptions = incomeDiv.querySelectorAll('div > div');
+    console.log('💰 Income value to find:', socioEconomicData.monthlyIncome);
+    
+    // Find the div that contains "Estimated Monthly Family Income"
+    let incomeContainer = null;
+    
+    otherInfoSection.querySelectorAll('div').forEach(div => {
+      if (div.querySelector('strong') && div.querySelector('strong').textContent.includes('Estimated Monthly Family Income')) {
+        // Get the div with margin-left:20px that comes right after
+        incomeContainer = div.querySelector('div[style*="margin-left:20px"]');
+      }
+    });
+    
+    console.log('🔍 Income container found:', !!incomeContainer);
+    
+    if (incomeContainer) {
+      // Get all direct child divs (the income options)
+      const incomeDivs = Array.from(incomeContainer.children).filter(el => el.tagName === 'DIV');
       
-      incomeOptions.forEach(option => {
-        const text = option.textContent.trim();
-        // Remove existing checkbox symbols
-        const cleanText = text.replace(/^[☐☑]\s*/, '');
+      console.log('📊 Found', incomeDivs.length, 'income options');
+      
+      let found = false;
+      
+      incomeDivs.forEach((div, index) => {
+        const text = div.textContent.trim();
+        // Remove checkbox symbol at the start
+        const cleanText = text.replace(/^[☐☑]\s*/, '').trim();
         
-        if (cleanText.includes(socioEconomicData.monthlyIncome) || 
-            socioEconomicData.monthlyIncome.includes(cleanText)) {
-          option.innerHTML = '☑ <i>' + cleanText.replace(/<\/?i>/g, '') + '</i>';
+        // Normalize whitespace AND normalize "to less than" / "less than" variations
+        const normalizedClean = cleanText
+          .replace(/\s+/g, ' ')
+          .replace(/\bto\s+less\b/g, 'less')
+          .toLowerCase();
+        
+        const normalizedIncome = socioEconomicData.monthlyIncome
+          .replace(/\s+/g, ' ')
+          .replace(/\bto\s+less\b/g, 'less')
+          .toLowerCase();
+        
+        console.log(`Option ${index}: "${normalizedClean}"`);
+        console.log(`  Comparing to: "${normalizedIncome}"`);
+        console.log(`  Match: ${normalizedClean === normalizedIncome}`);
+        
+        // Use textContent for safer text assignment
+        if (normalizedClean === normalizedIncome) {
+          console.log('✅ MATCHED!', cleanText);
+          div.textContent = '☑ ' + cleanText;
+          found = true;
         } else {
-          option.innerHTML = '☐ <i>' + cleanText.replace(/<\/?i>/g, '') + '</i>';
+          div.textContent = '☐ ' + cleanText;
         }
       });
+      
+      if (!found) {
+        console.warn('⚠️ No matching income found');
+        console.warn('Stored value (normalized):', normalizedIncome);
+      }
+    } else {
+      console.log('❌ Income container not found');
     }
   }
+
+  console.log('✅ Socio-economic data populated in form preview');
 }
-
-console.log('✅ Socio-economic data populated in form preview');
-
 
       // 🔥 LOAD SAVED PHOTO - FIXED VERSION
       setTimeout(() => {
@@ -572,4 +704,3 @@ console.log('✅ Socio-economic data populated in form preview');
   // ====== Initial render ======
   updateSteps();
 });
-

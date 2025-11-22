@@ -1,3 +1,4 @@
+
 // =====================================================
 // aap.js — patched: save progress + clear highlights fixes
 // =====================================================
@@ -223,39 +224,51 @@ const steps = document.querySelectorAll(".step");
 // Update UI function
 function updateStepsUI() {
   steps.forEach((stepEl, idx) => {
-    stepEl.classList.toggle("active", idx === currentStep);
-    stepEl.classList.toggle("unlocked", idx <= maxUnlockedStep);
+    const circle = stepEl.querySelector("span"); // step number circle
+    const icon = stepEl.querySelector("i");      // optional icon
+    const label = stepEl.querySelector("p");     // step label
+    const isActive = idx === currentStep;
 
-    // ensure pointer and cursor
-    stepEl.style.pointerEvents = (idx <= maxUnlockedStep) ? "auto" : "none";
-    stepEl.style.cursor = (idx <= maxUnlockedStep) ? "pointer" : "default";
+    // Active step
+    stepEl.classList.toggle("active", isActive);
+
+    if (idx <= maxUnlockedStep) {
+      // unlocked step
+      stepEl.classList.add("clickable");
+      stepEl.style.pointerEvents = "auto";
+      stepEl.style.cursor = "pointer";
+
+      if (icon) icon.style.opacity = "1";
+      if (label) label.style.opacity = "1";
+      if (circle) circle.style.borderColor = isActive ? "#1a9737" : "#ccc";
+
+      // attach click handler
+      stepEl.onclick = () => {
+        // update progress if clicked ahead
+        maxUnlockedStep = Math.max(maxUnlockedStep, idx);
+        localStorage.setItem(STORAGE_KEY, String(maxUnlockedStep));
+
+        // save last visited step
+        localStorage.setItem("lastVisitedStep", String(idx));
+
+        // navigate to page
+        const target = pageMap[idx] || pageMap[0];
+        setTimeout(() => { window.location.href = target; }, 50);
+      };
+    } else {
+      // locked step
+      stepEl.classList.remove("clickable");
+      stepEl.style.pointerEvents = "none";
+      stepEl.style.cursor = "default";
+
+      if (circle) circle.style.borderColor = "#ddd";
+      if (icon) icon.style.opacity = "0.4";
+      if (label) label.style.opacity = "0.5";
+
+      stepEl.onclick = null; // remove click
+    }
   });
 }
-
-// Make steps interactive
-steps.forEach((stepEl, idx) => {
-  if (idx <= maxUnlockedStep) {
-    // attach handler — using delegation here ensures duplicates aren't attached on reload,
-    // but we guard by removing previous handlers in case script is re-run
-    stepEl.addEventListener('click', (ev) => {
-      // Save progress: if user clicked ahead of current max, expand unlocked range
-      if (idx > maxUnlockedStep) {
-        maxUnlockedStep = idx;
-        localStorage.setItem(STORAGE_KEY, String(maxUnlockedStep));
-      }
-
-      // Save the chosen step as current progress as well (so toggling persists)
-      localStorage.setItem("lastVisitedStep", String(idx));
-
-      // navigate to corresponding page
-      const target = pageMap[idx] || pageMap[0];
-      // small delay to ensure storage writes happen
-      setTimeout(() => {
-        window.location.href = target;
-      }, 50);
-    });
-  }
-});
 
 // ensure UI reflects current values
 updateStepsUI();

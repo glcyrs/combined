@@ -707,8 +707,8 @@
 
         <p class="siblings-question"><u>Do you have any siblings (brothers or sisters)?</u></p>
         <div class="radio-group">
-          <label><input type="radio" name="hasSiblings" id="hasSiblingsYes"> Yes</label>
-          <label><input type="radio" name="hasSiblings" id="hasSiblingsNo"> No</label>
+          <label><input type="radio" name="hasSiblings" id="hasSiblingsYes" value="yes"> Yes</label>
+          <label><input type="radio" name="hasSiblings" id="hasSiblingsNo" value="no"> No</label>
         </div>
 
 
@@ -727,69 +727,69 @@
               <th>Option</th>
             </tr>
             <tr>
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
-              <td class="dropdown-cell">
-                <select class="dropdown-field">
-                   <option value="">Select</option>
-                   <option value="Elementary">Elementary</option>
-                   <option value="High School">High School</option>
-                   <option value="College">College</option>
-                </select>
-              </td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td class="dropdown-cell">
+              <select class="dropdown-field">
+                <option value="">Select</option>
+                <option value="Elementary">Elementary</option>
+                <option value="High School">High School</option>
+                <option value="College">College</option>
+              </select>
+            </td>
 
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
-              <td>
-                <button type="button" class="add-row-btn" onclick="addSiblingToSummary()">Add</button>
-              </td>
-            </tr>
-          </table>
-        </div>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td>
+              <button type="button" class="add-row-btn" onclick="addSiblingToSummary()">Add</button>
+            </td>
+          </tr>
+        </table>
+      </div>
 
 
-        <!-- SIBLING/S SUMMARY TABLE -->
-        <div class="siblings-summary-box-header" id="summaryHeader">
-          <div class="siblings-summary-box-title">Siblings</div>
-        </div>
+      <!-- SIBLING/S SUMMARY TABLE -->
+      <div class="siblings-summary-box-header" id="summaryHeader">
+        <div class="siblings-summary-box-title">Siblings</div>
+      </div>
 
-        <div class="siblings-summary-box" id="summaryBox">
-          <table class="siblings-summary-table">
-            <tr>
-              <th>#</th>
-              <th>Fullname</th>
-              <th>Age</th>
-              <th>Highest Educational Attainment</th>
-              <th>School</th>
-              <th>Year Graduated</th>
-              <th>Option</th>
-            </tr>
-            <tr>
-              <td colspan="7" class="no-siblings-text">**No siblings**</td>
-            </tr>
-          </table>
-        </div>
+      <div class="siblings-summary-box" id="summaryBox">
+        <table class="siblings-summary-table">
+          <tr>
+            <th>#</th>
+            <th>Fullname</th>
+            <th>Age</th>
+            <th>Highest Educational Attainment</th>
+            <th>School</th>
+            <th>Year Graduated</th>
+            <th>Option</th>
+          </tr>
+          <tr>
+            <td colspan="7" class="no-siblings-text">**No siblings**</td>
+          </tr>
+        </table>
       </div>
     </div>
+  </div>
 
     <!--
     <button type="button" class="next-btn">Next &#10140;</button>
     -->
     <!-- Next Button -->
-      <div class="button-container">
-        <button class="next-btn" onclick="handleNext()">
-          Next &#10140;
-        </button>
-      </div>
-
-      <!-- Error notification container -->
-      <div id="error-notif" class="error-notif">
-        Please fill all required fields before proceeding.
-      </div>
-
-
+    <div class="button-container">
+      <button class="next-btn" onclick="handleNext()">
+        Next &#10140;
+      </button>
     </div>
-  </section>
+
+    <!-- Error notification container -->
+    <div id="error-notif" class="error-notif">
+      Please fill all required fields before proceeding.
+    </div>
+
+
+  </div>
+</section>
   <!--
   <script src="personal.js"></script>
   -->

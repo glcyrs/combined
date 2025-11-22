@@ -1,3 +1,4 @@
+
 // =====================================================
 // GRADE CARD DOWNLOAD ALERT
 // =====================================================
@@ -101,28 +102,45 @@ if (currentStep > maxUnlockedStep) {
 const steps = document.querySelectorAll(".step");
 
 // APPLY UI
-steps.forEach((step, index) => {
+function updateStepsUI() {
+  steps.forEach((step, index) => {
+    const circle = step.querySelector("span"); // circle element
+    const icon = step.querySelector("i");      // optional icon
+    const label = step.querySelector("p");     // step label
 
-  // highlight active
-  if (index === currentStep) {
-    step.classList.add("active");
-  }
+    const isActive = index === currentStep;
+    step.classList.toggle("active", isActive);
 
-  // UNLOCKED steps
-  if (index <= maxUnlockedStep) {
-    step.classList.add("unlocked");
-    step.style.cursor = "pointer";
+    if (index <= maxUnlockedStep) {
+      // unlocked step
+      step.classList.add("clickable");
+      step.style.pointerEvents = "auto";
+      step.style.cursor = "pointer";
 
-    // avoid blocking clicks
-    step.querySelectorAll("*").forEach(el => el.style.pointerEvents = "none");
+      if (icon) icon.style.opacity = "1";
+      if (label) label.style.opacity = "1";
+      if (circle) circle.style.borderColor = isActive ? "#1a9737" : "#ccc";
 
-    // click → navigate + save progress
-    step.addEventListener("click", () => {
-      localStorage.setItem("maxUnlockedStep", Math.max(maxUnlockedStep, index));
-      window.location.href = pageMap[index];
-    });
-  }
-});
+      // attach click handler
+      step.onclick = () => {
+        localStorage.setItem("maxUnlockedStep", Math.max(maxUnlockedStep, index));
+        window.location.href = pageMap[index];
+      };
+    } else {
+      // locked step
+      step.classList.remove("clickable");
+      step.style.pointerEvents = "none";
+      step.style.cursor = "default";
+
+      if (circle) circle.style.borderColor = "#ddd";
+      if (icon) icon.style.opacity = "0.4";
+      if (label) label.style.opacity = "0.5";
+      step.onclick = null; // remove any click
+    }
+  });
+}
+
+updateStepsUI();
 
 // =====================================================
 // HANDLE NEXT BUTTON
@@ -205,4 +223,3 @@ document.querySelectorAll("input, select, textarea").forEach(field => {
     }
   }
 });
-

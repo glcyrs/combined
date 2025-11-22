@@ -268,7 +268,7 @@ body {
 .welcome-section {
   display: flex;
   justify-content: center;
-  margin: 50px auto;
+  margin: 30px auto;
 }
 
 .welcome-box {
@@ -278,22 +278,23 @@ body {
   background-color: #fff;
   border: 4px solid #EEEEEE;
   border-radius: 10px;
-  padding: 30px;
+  padding: 20px;
   width: 92%;
   /*
   max-width: 1000px;   /* keeps it from stretching too wide */
   /*min-width: 700px;    /* prevents shrinking too much */
   
-  margin: 10px auto; /* default spacing */
+  /*margin: 10px auto; /* default spacing */
   box-sizing: border-box;
   flex-wrap: wrap;
   gap: 20px;
+  margin-top: -20px !important;
 }
 
 /* When the screen gets small enough for overlap risk */
 @media (max-width: 900px) {
   .welcome-box {
-    margin-top: 210px; /* add extra space only when needed */
+    margin-top: 200px; /* add extra space only when needed */
   }
 }
 .welcome-content {

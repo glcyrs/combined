@@ -1,3 +1,4 @@
+
 /* ---------- PRINT STYLES ---------- */
 @media print {
 
@@ -235,8 +236,8 @@ body {
   content: "";
   position: absolute;
   top: 40%;
-  left: 50px; /* margin from left */
-  right: 50px; /* margin from right */
+  left: 65px; /* margin from left */
+  right: 65px; /* margin from right */
   height: 2px;
   background-color: #ccc;
   z-index: -1; /* put behind the step circles */
@@ -662,7 +663,7 @@ body {
     }
 
     .btn-next {
-      background-color: #28a745;
+      background-color: #5CB85C;
       color: white;
       font-weight: 600;
       border: none;
@@ -670,13 +671,16 @@ body {
       border-radius: 40px;
       cursor: pointer;
       transition: background-color 0.3s;
-      margin: 30px 30px;
+      margin-right: 60px;
+      margin-bottom: 30px;
       font-family: Arial, sans-serif;
       display: float;
+      font-weight: normal;
+      font-size: 16px;
     }
 
     .btn-next:hover {
-      background-color: #218838;
+      background-color: #4cae4c;
     }
 
     @media print {

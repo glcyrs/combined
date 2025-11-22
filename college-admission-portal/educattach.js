@@ -1,3 +1,4 @@
+
 const downloads = [
   'assets/grades_form_1.pdf',
   'assets/grades_form_2.pdf'
@@ -34,47 +35,74 @@ let maxUnlockedStep = (storedMax !== null && !isNaN(storedMax)) ? storedMax : cu
 document.addEventListener("DOMContentLoaded", () => {
   const steps = document.querySelectorAll(".step");
 
-  function updateSteps() {
+  function updateStepsUI() {
     steps.forEach((step, index) => {
-      step.classList.toggle("active", index === currentStep);
+      const circle = step.querySelector("span"); // step number circle
+      const icon = step.querySelector("i");      // optional icon
+      const label = step.querySelector("p");     // step label
+      const isActive = index === currentStep;
+
+      // Active step
+      step.classList.toggle("active", isActive);
+
       if (index <= maxUnlockedStep) {
+        // Unlocked step
         step.classList.add("clickable");
         step.style.pointerEvents = "auto";
-        step.style.opacity = "1";
+        step.style.cursor = "pointer";
+
+        if (icon) icon.style.opacity = "1";
+        if (label) label.style.opacity = "1";
+        if (circle) circle.style.borderColor = isActive ? "#1a9737" : "#ccc";
+
+        // Click handler
+        step.onclick = () => {
+          if (index > maxUnlockedStep) return;
+
+          currentStep = index;
+
+          // Unlock next step if clicking last unlocked
+          if (currentStep === maxUnlockedStep && maxUnlockedStep < steps.length - 1) {
+            maxUnlockedStep++;
+          }
+
+          localStorage.setItem("currentStep", currentStep);
+          localStorage.setItem("maxUnlockedStep", maxUnlockedStep);
+
+          updateStepsUI();
+
+          if (typeof showSection === "function") showSection(currentStep);
+
+          // Navigate to page
+          switch (index) {
+            case 0: window.location.href = "index.html"; break;
+            case 1: window.location.href = "readfirst.html"; break;
+            case 2: window.location.href = "confirmation.html"; break;
+            case 3: window.location.href = "aap.html"; break;
+            case 4: window.location.href = "personal.html"; break;
+            case 5: window.location.href = "educattach.html"; break;
+            case 6: window.location.href = "programs.html"; break;
+            case 7: window.location.href = "form.html"; break;
+            case 8: window.location.href = "submit.html"; break;
+          }
+        };
       } else {
+        // Locked step
         step.classList.remove("clickable");
         step.style.pointerEvents = "none";
-        step.style.opacity = "1";
+        step.style.cursor = "default";
+
+        if (circle) circle.style.borderColor = "#ddd";
+        if (icon) icon.style.opacity = "0.4";
+        if (label) label.style.opacity = "0.5";
+
+        step.onclick = null; // remove click
       }
     });
-    localStorage.setItem("currentStep", currentStep);
-    localStorage.setItem("maxUnlockedStep", maxUnlockedStep);
   }
 
-  steps.forEach((step, index) => {
-    step.addEventListener("click", () => {
-      if (index > maxUnlockedStep) return;
-      currentStep = index;
-      if (currentStep === maxUnlockedStep && maxUnlockedStep < steps.length - 1) {
-        maxUnlockedStep++;
-      }
-      updateSteps();
-      if (typeof showSection === "function") showSection(currentStep);
-      switch (index) {
-        case 0: window.location.href = "index.html"; break;
-        case 1: window.location.href = "readfirst.html"; break;
-        case 2: window.location.href = "confirmation.html"; break;
-        case 3: window.location.href = "aap.html"; break;
-        case 4: window.location.href = "personal.html"; break;
-        case 5: window.location.href = "educattach.html"; break;
-        case 6: window.location.href = "programs.html"; break;
-        case 7: window.location.href = "form.html"; break;
-        case 8: window.location.href = "submit.html"; break;
-      }
-    });
-  });
-
-  updateSteps();
+  // Initial UI render
+  updateStepsUI();
 });
 
 // =====================================================
@@ -399,6 +427,18 @@ function syncGradesToGradesData() {
         }
       });
 
+      // Validate School Type (radio buttons)
+const schoolTypeSelected = document.querySelector('input[name="schoolType"]:checked');
+
+if (!schoolTypeSelected) {
+  isValid = false;
+  showNotification("Please select a School Type!", "error");
+
+  // Optional: highlight radio group
+  const radioGroup = document.querySelector('.radio-group');
+  if (radioGroup) radioGroup.classList.add("input-error");
+}
+
       showNotification("Please fill out all required fields, complete all grades, and upload all attachments!", "error");
       return;
     }
@@ -484,6 +524,44 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+
+// SCHOOL TYPE CODE — FULLY FIXED VERSION WITH REQUIRED VALIDATION
+
+// Save selection immediately whenever user changes radio
+document.addEventListener("change", function (e) {
+  if (e.target.name === "schoolType") {
+    localStorage.setItem("edu-schoolType", e.target.value);
+    console.log("Saved:", e.target.value);
+  }
+});
+
+// Restore saved answer AFTER the page fully loads
+window.onload = function () {
+  const saved = localStorage.getItem("edu-schoolType");
+  console.log("Loaded saved value:", saved);
+
+  if (saved) {
+    const selectedRadio = document.querySelector(
+      `input[name="schoolType"][value="${saved}"]`
+    );
+
+    if (selectedRadio) {
+      selectedRadio.checked = true;
+      console.log("Restored selected radio:", saved);
+
+      // IMPORTANT: Trigger browser validation to accept restored value
+      selectedRadio.dispatchEvent(new Event("change"));
+    } else {
+      console.log("Saved value found but no matching radio");
+    }
+  } else {
+    console.log("No saved schoolType available");
+  }
+};
+
+//  END OF SCHOOL TYPE CODE
+
+
   const shsInputs = document.querySelectorAll('.grades-table2 input[type="number"]');
   const shsSelects = document.querySelectorAll('.grades-table2 select');
 
@@ -544,27 +622,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
   updateFileList();
 
-  const eduFields = document.querySelectorAll('.container2 input, .container2 select, .container2 textarea');
-  eduFields.forEach(field => {
-    const saved = localStorage.getItem(`edu-${field.name}`);
-    if (saved !== null) {
-      if (field.type === "checkbox" || field.type === "radio") {
-        field.checked = saved === "true";
-      } else {
-        field.value = saved;
-      }
-      field.classList.remove("input-error");
-    }
+const eduFields = document.querySelectorAll('.container2 input, .container2 select, .container2 textarea');
 
-    field.addEventListener("change", () => {
-      if (field.type === "checkbox" || field.type === "radio") {
-        localStorage.setItem(`edu-${field.name}`, field.checked);
-      } else {
-        localStorage.setItem(`edu-${field.name}`, field.value);
-      }
-      field.classList.remove("input-error");
-    });
+eduFields.forEach(field => {
+
+  //  Ignore schoolType here (handled by dedicated radio code)
+  if (field.name === "schoolType") return;
+
+  const saved = localStorage.getItem(`edu-${field.name}`);
+  if (saved !== null) {
+    if (field.type === "checkbox") {
+      field.checked = saved === "true";
+    } else {
+      field.value = saved;
+    }
+    field.classList.remove("input-error");
+  }
+
+  field.addEventListener("change", () => {
+    if (field.type === "checkbox") {
+      localStorage.setItem(`edu-${field.name}`, field.checked);
+    } else {
+      localStorage.setItem(`edu-${field.name}`, field.value);
+    }
+    field.classList.remove("input-error");
   });
+});
 
   // 🔥 Initial sync on page load
   syncGradesToGradesData();
